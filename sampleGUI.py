@@ -6,7 +6,7 @@ This temporary script file is located here:
 /home/griffint/.spyder2/.temp.py
 """
 
-from TKinter import Tk,BOTH
+from Tkinter import Tk,BOTH
 from ttk import Frame, Button, Style
 
 class Example(Frame):
@@ -14,7 +14,7 @@ class Example(Frame):
     def __init__(self, parent):
         
         self.parent = parent 
-        self.initUI():
+        self.initUI()
             
     def initUI(self):
         
@@ -33,3 +33,6 @@ def main():
     root.geometry("1000x700+500+300")
     app =Example(root)
     root.mainloop()
+    
+if __name__ == '__main__':
+    main()
