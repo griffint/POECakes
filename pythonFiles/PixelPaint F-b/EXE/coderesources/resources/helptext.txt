@@ -1,0 +1,17 @@
+PixelPaint is a simple paint program that is designed to be fun and easy to use. With these key-commands you can do all the program has to offer:
+
+Left Click: Draw a pixel of the selected size and color. If 'v' is held down, you can draw connected points.
+
+Right Click: Erase (draw a white pixel) of the selected size. If 'v' is held down you can erase conncted points.
+
+'v' key: See above.
+
+'b' key: Change brush.
+
+'c' key: Change color.
+
+'m' key: Main menu, where you can save, change brush, change color, and access the help menu.
+
+'h' key: Access help menu.
+
+'s' key: Save.

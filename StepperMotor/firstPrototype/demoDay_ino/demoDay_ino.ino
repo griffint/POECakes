@@ -16,8 +16,8 @@ int lastButtonState = LOW; // previous state (HIGH or LOW) of button
 
 long lastDebounceTime = 0;
 long debounceDelay = 50; // time necessary for intentional press
-long interval = 2500;
-long intervalBounce = 700;
+long interval = 1000;
+long intervalBounce = 400;
 
 void setup(){
   pinMode (button, INPUT);
@@ -28,37 +28,14 @@ void setup(){
 }
 
 void loop() {
+  Serial.print("Unce more through the loop");
   int reading = digitalRead(button);
-   if (reading != lastButtonState) { //If current buttonstate has changed from last
-    lastDebounceTime = millis(); 
-  } 
-  if ((millis() - lastDebounceTime) > debounceDelay) { //whatever the reading is, it has been there for
-      if (reading != buttonState) { // longer than the debounce delay...
-        buttonState = reading; // ...so take it as actual current state
-        if (buttonState == HIGH) {
-          buttonPushCounter++; // Increase the count by 1 with each loop/interval
-
-          String stringOne = "buttonPushCounter: ";
-          String stringThree = stringOne + buttonPushCounter;
-          Serial.println(stringThree); }}}
-          
-  lastButtonState = reading; // Save current count as the last count for next time
+   Serial.print(reading);
   
- unsigned long currentMillis = millis(); // Don't stop code to wait (delay) but check if time passed
- if (currentMillis - previousMillis > interval) {
-    previousMillis = currentMillis; }
-
-     if (buttonPushCounter == 1) { // START ROTATING
-      myMotor->step(20, FORWARD, SINGLE);
-      myMotor->step(20, BACKWARD, SINGLE);
+     if (reading==HIGH) { // START ROTATING
+      myMotor->step(4, FORWARD, SINGLE);
       Serial.println("Pressed");
+      delay(1000);
     }
-     if (buttonPushCounter == 2) { // ALL FLASHING
-      myMotor->step(0, FORWARD, MICROSTEP); 
-    }
-           Serial.println(buttonPushCounter);
-            
-   if (buttonPushCounter > 3) {
-       buttonPushCounter = 1; } 
-}
   
+}
