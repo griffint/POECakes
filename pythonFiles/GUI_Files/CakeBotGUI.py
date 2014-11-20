@@ -9,11 +9,17 @@
 
 #Customised for POE use by Griffin Tschurwald. Thank you pie for the base code!
 
-import pygame, sys, easygui, os
+import pygame, sys, easygui, os, serial
 
 #print pygame.version.ver
 fill = False#Remove me!
 
+ser = serial.Serial(
+    port='/dev/ttyACM0',
+    baudrate=9600,
+    )
+    
+ser.write("23,bottlesj")
 #Variable storer---------------------------------------------------------------
 class storer():
     def __init__(self, newone):#Define all the variables
@@ -90,6 +96,9 @@ class storer():
         else:
             pass
 #Brush Chooser-----------------------------------------------------------------
+
+#-------This needs to be changed to tip chooser-------------------------------
+    
     def brushchooser(self):
         newbrush = easygui.buttonbox("Which brush would you like?", title = "Brush Menu", choices = ["Big", "Medium", "Small", "Custom", "Cancel"])
         if newbrush == "Cancel":
@@ -109,23 +118,28 @@ class storer():
                 self.bsize = 5
                 
    #Preset pattern picker-----------------------------------------------------------------
-    def presetsChooseer(self):
-        newbrush = easygui.buttonbox("Which preset pattern would you like to draw", title = "Brush Menu", choices = ["Big", "Medium", "Small", "Custom", "Cancel"])
-        if newbrush == "Cancel":
-            pass
-        else:
-            if newbrush == "Custom":
-                newnewbrush = easygui.enterbox("Enter the brush size as a number.", title = "Custom Brush Menu")
-                if newnewbrush == None:
-                    self.brushchooser()
-                else:
-                    self.bsize = int(newnewbrush)
-            elif newbrush == "Big":
-                self.bsize = 25
-            elif newbrush == "Medium":
-                self.bsize = 15
-            elif newbrush == "Small":
-                self.bsize = 5
+
+#----Not sure what this is for or where it's used----------------------
+
+#==============================================================================
+#     def presetsChooseer(self):
+#         newbrush = easygui.buttonbox("Which preset pattern would you like to draw", title = "Brush Menu", choices = ["Big", "Medium", "Small", "Custom", "Cancel"])
+#         if newbrush == "Cancel":
+#             pass
+#         else:
+#             if newbrush == "Custom":
+#                 newnewbrush = easygui.enterbox("Enter the brush size as a number.", title = "Custom Brush Menu")
+#                 if newnewbrush == None:
+#                     self.brushchooser()
+#                 else:
+#                     self.bsize = int(newnewbrush)
+#             elif newbrush == "Big":
+#                 self.bsize = 25
+#             elif newbrush == "Medium":
+#                 self.bsize = 15
+#             elif newbrush == "Small":
+#                 self.bsize = 5
+#==============================================================================
     
     
     
@@ -173,6 +187,24 @@ class storer():
                 except:
                     easygui.msgbox("Not a supported file type. Supported file types are: .jpg, .gif, .png, .bmp, .tga, .pcx, .lbm, .xpm, and  .tif. Please select a different file.", title = "Open Error")
                     self.mainmenu()
+                    
+    def printmenu(self):
+        printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Test Connection to CakeBot", "Motor Check", "Printing help", "Print Your Design!","Print a preset design"])
+        if printmenu == "Test Connection to CakeBot":
+            print("Connection WOrking!!!!")
+            easygui.msgbox("Cakebot Working I think")
+            
+        if printmenu == "Motor Check":
+            easygui.msgbox("Motor being checked")
+        if printmenu == "Printing help":
+            easygui.msgbox("Help me obi wan kenobi")
+        if printmenu == "Print Your Design!":
+            easygui.msgbox("Printing Sequence Started")
+        if printmenu == "Print a preset design":
+            presetmenu = easygui.choicebox("Pick a preset design to print to your cake", choices = ["Outside Border","Wavy Border", "Border Near Center"," Wavy Border Near Center"])
+                #Need to write code for printing those choices here
+            if presetmenu == "Outside Border":
+                
     
     def toolmenu(self):
         toolmenu = easygui.buttonbox("Select which tool you want. You are currently using: " + store.toolname, title = "Tool Menu", choices = ["Toggle Color Picker", "Toggle Text Tool", "Toggle Polygon Tool", "No tool", "Cancel"])
@@ -298,7 +330,7 @@ paintbox = pygame.image.load("resources/buckets.gif")
 #The main loop-----------------------------------------------------------------
 while 1:
     clock.tick(30)
-    #Checks for events---------------------------------------------------------
+    #Checks for events---basically user doing anything--------------------------
     for event in pygame.event.get():
         # if they want to exit, let them exit
         if event.type == pygame.QUIT:
@@ -320,6 +352,10 @@ while 1:
                 
             elif event.key == pygame.K_c:#Color chooser
                 store.choosecolor()
+            
+            elif event.key == pygame.K_SLASH:#Cakebot Printing Menu
+                store.printmenu()
+
             elif event.key == pygame.K_b:#Brush chooser
                 store.brushchooser()
             
@@ -402,7 +438,7 @@ while 1:
                 print store.dropper4
                 print store.dropper5
                         
-        #the actual drawing that happens when people hold the mouse down                
+        #the actual drawing that happens when people hold the mouse down-----                
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pos()[0] < store.new[0]:
                 if store.dropper:
@@ -470,7 +506,10 @@ while 1:
                         store.down2 = True
                         pygame.draw.rect(drawspace, [255, 255, 255], [pygame.mouse.get_pos()[0]-(store.bsize)/2, pygame.mouse.get_pos()[1]-(store.bsize)/2, store.bsize, store.bsize], 0)
                         store.saved = False
+      #these control what happens when certain buttons get pressed   
+      #it looks like mouse pos [0] is the x and pos [1] is the y
             else:
+                #new is the image size
                 if pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>10 and pygame.mouse.get_pos()[1]<60:
                     store.brushchooser()
                 elif pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>70 and pygame.mouse.get_pos()[1]<120:
