@@ -14,12 +14,15 @@ import pygame, sys, easygui, os, serial
 #print pygame.version.ver
 fill = False#Remove me!
 
-ser = serial.Serial(
-    port='/dev/ttyACM0',
-    baudrate=9600,
-    )
-    
-ser.write("23,bottlesj")
+#==============================================================================
+# ser = serial.Serial(
+#     port='/dev/ttyACM0',
+#     baudrate=9600,
+#     )
+#     
+# ser.write("23,bottlesj")
+# print ser.read(50)
+#==============================================================================
 #Variable storer---------------------------------------------------------------
 class storer():
     def __init__(self, newone):#Define all the variables
@@ -204,6 +207,7 @@ class storer():
             presetmenu = easygui.choicebox("Pick a preset design to print to your cake", choices = ["Outside Border","Wavy Border", "Border Near Center"," Wavy Border Near Center"])
                 #Need to write code for printing those choices here
             if presetmenu == "Outside Border":
+                return
                 
     
     def toolmenu(self):
@@ -518,7 +522,7 @@ while 1:
                     store.toolmenu()
                 elif pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>190 and pygame.mouse.get_pos()[1]<240:
                     store.mainmenu()
-                elif pygame.mouse.get_pos()[0]>store.new[0]+100 and pygame.mouse.get_pos()[0]<store.new[0]+220 and pygame.mouse.get_pos()[1]>10 and pygame.mouse.get_pos()[1]<130:
+                elif pygame.mouse.get_pos()[0]>store.new                                                                                                                                                                                                                                                                                                                [0]+100 and pygame.mouse.get_pos()[0]<store.new[0]+220 and pygame.mouse.get_pos()[1]>10 and pygame.mouse.get_pos()[1]<130:
                     store.color = screen.get_at(pygame.mouse.get_pos())
                 elif pygame.mouse.get_pos()[0]>store.new[0]+105 and pygame.mouse.get_pos()[0]<store.new[0]+120 and pygame.mouse.get_pos()[1]>140 and pygame.mouse.get_pos()[1]<155:
                     store.color = store.color2
