@@ -14,12 +14,12 @@ import pygame, sys, easygui, os, serial
 #print pygame.version.ver
 fill = False#Remove me!
 
-#==============================================================================
-# ser = serial.Serial(
-#     port='/dev/ttyACM0',
-#     baudrate=9600,
-#     )
-#     
+#===================SERIAL PORT SETUP===========================================================
+ ser = serial.Serial(
+     port='/dev/ttyACM0',
+     baudrate=9600,
+     )
+     
 # ser.write("23,bottlesj")
 # print ser.read(50)
 #==============================================================================
@@ -194,7 +194,7 @@ class storer():
     def printmenu(self):
         printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Test Connection to CakeBot", "Motor Check", "Printing help", "Print Your Design!","Print a preset design"])
         if printmenu == "Test Connection to CakeBot":
-            print("Connection WOrking!!!!")
+            ser.write("jj")
             easygui.msgbox("Cakebot Working I think")
             
         if printmenu == "Motor Check":
