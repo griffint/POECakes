@@ -15,10 +15,10 @@ import pygame, sys, easygui, os, serial
 fill = False#Remove me!
 
 #===================SERIAL PORT SETUP===========================================================
- ser = serial.Serial(
-     port='/dev/ttyACM0',
-     baudrate=9600,
-     )
+ #ser = serial.Serial(
+  #   port='/dev/ttyACM0',
+   #  baudrate=9600,
+     
      
 # ser.write("23,bottlesj")
 # print ser.read(50)
