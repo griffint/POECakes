@@ -1,5 +1,5 @@
 #Programmed by pie
-#(Tediously) Commented by pie 
+#(Tediously) Commented by pie
 #If you are new to pygame or python, read over this program and try to learn something from it
 
 #I give anyone permission modify this code as long as they don't distribute their modified version.
@@ -18,8 +18,8 @@ fill = False#Remove me!
  #ser = serial.Serial(
   #   port='/dev/ttyACM0',
    #  baudrate=9600,
-     
-     
+
+
 # ser.write("23,bottlesj")
 # print ser.read(50)
 #==============================================================================
@@ -88,10 +88,10 @@ class storer():
             if fieldValues == None:
                 self.choosecolor()
             else:
-                print fieldValues    
+                print fieldValues
                 if '' in fieldValues:
                     easygui.msgbox("All fields must be filled", title = "Input Error")
-                else:    
+                else:
                     if int(fieldValues[0]) > 255 or int(fieldValues[0]) < 0 or int(fieldValues[1]) > 255 or int(fieldValues[1]) < 0 or int(fieldValues[2]) > 255 or int(fieldValues[2]) < 0:
                         easygui.msgbox("All RGB values must be between 0 and 255", title = "Input Error")
                     else:
@@ -101,7 +101,7 @@ class storer():
 #Brush Chooser-----------------------------------------------------------------
 
 #-------This needs to be changed to tip chooser-------------------------------
-    
+
     def brushchooser(self):
         newbrush = easygui.buttonbox("Which brush would you like?", title = "Brush Menu", choices = ["Big", "Medium", "Small", "Custom", "Cancel"])
         if newbrush == "Cancel":
@@ -119,7 +119,7 @@ class storer():
                 self.bsize = 15
             elif newbrush == "Small":
                 self.bsize = 5
-                
+
    #Preset pattern picker-----------------------------------------------------------------
 
 #----Not sure what this is for or where it's used----------------------
@@ -143,9 +143,9 @@ class storer():
 #             elif newbrush == "Small":
 #                 self.bsize = 5
 #==============================================================================
-    
-    
-    
+
+
+
     def save(self):
         extensionchoice = easygui.buttonbox("Which file extension would you like to use?", title = 'Select a file extension', choices = ["Bitmap {.bmp}", "Targa {.tga}"])
         if extensionchoice == "Bitmap {.bmp}":
@@ -161,7 +161,7 @@ class storer():
             self.imagename = savelocation + extension
             pygame.display.set_caption("PixelPaint - " + store.imagename)
             self.saved = True
-    
+
     def mainmenu(self):
         menuchoice = easygui.choicebox("Select a task", title = "Main Menu", choices = ["Change Color", "Change Brush", "Save", "Open", "Help", "Tool Menu"])
         if menuchoice == "Save":
@@ -190,15 +190,15 @@ class storer():
                 except:
                     easygui.msgbox("Not a supported file type. Supported file types are: .jpg, .gif, .png, .bmp, .tga, .pcx, .lbm, .xpm, and  .tif. Please select a different file.", title = "Open Error")
                     self.mainmenu()
-                    
+
+    #This defines the cakebot printing menu. Need to put in better testing code
     def printmenu(self):
-        printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Test Connection to CakeBot", "Motor Check", "Printing help", "Print Your Design!","Print a preset design"])
-        if printmenu == "Test Connection to CakeBot":
-            ser.write("jj")
-            easygui.msgbox("Cakebot Working I think")
-            
-        if printmenu == "Motor Check":
-            easygui.msgbox("Motor being checked")
+        printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Testing Menu", "Printing help", "Print Your Design!","Print a preset design"])
+        #The Testing menu needs to have lots of tools to check all of our motors
+        if printmenu == "Testing Menu":
+            testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Extruding Motor", "Test Lazy Susan Motor"])
+            if testmenu == "Test connection":
+                #test overall connection to cakebot 
         if printmenu == "Printing help":
             easygui.msgbox("Help me obi wan kenobi")
         if printmenu == "Print Your Design!":
@@ -208,8 +208,8 @@ class storer():
                 #Need to write code for printing those choices here
             if presetmenu == "Outside Border":
                 return
-                
-    
+
+
     def toolmenu(self):
         toolmenu = easygui.buttonbox("Select which tool you want. You are currently using: " + store.toolname, title = "Tool Menu", choices = ["Toggle Color Picker", "Toggle Text Tool", "Toggle Polygon Tool", "No tool", "Cancel"])
         if toolmenu == "No tool":
@@ -232,7 +232,7 @@ class storer():
             self.texton = False
             self.picker = False
             self.toolname = "Polygon Tool"
-            
+
     def drawtext(self):
         self.mousepos = pygame.mouse.get_pos()
         size = easygui.integerbox("Enter the size you want your text:", title = 'Text Tool')
@@ -248,7 +248,7 @@ class storer():
         print Font.size(text)
         drawspace.blit(drawtext, [self.mousepos[0] - Font.size(text)[0]/2, self.mousepos[1] - Font.size(text)[1]/2])
         self.saved = False
-        
+
     def drawline(self, point_one, point_two, width):
         pygame.draw.line(drawspace, self.color, point_one, point_two, width)
     def deselectall(self):
@@ -259,12 +259,12 @@ class storer():
         self.dropper5 = False
         self.dropper4 = False
         self.dropper3 = False
-        self.dropper2 = False 
+        self.dropper2 = False
         self.dropper = False
-        self.poly = False 
+        self.poly = False
         self.line = False
         self.texton = False
-        
+
 msg = "Enter the height and width of your Cake Design"
 title = "New file"
 fieldNames = ["Height","Width"]
@@ -353,23 +353,23 @@ while 1:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:#Save menu
                 store.save()
-                
+
             elif event.key == pygame.K_c:#Color chooser
                 store.choosecolor()
-            
+
             elif event.key == pygame.K_SLASH:#Cakebot Printing Menu
                 store.printmenu()
 
             elif event.key == pygame.K_b:#Brush chooser
                 store.brushchooser()
-            
+
             #can't seem to access helptext.txt
             #elif event.key == pygame.K_h:#Help menu
              #   easygui.textbox("Help:", title = "Help", text = open("helptext.txt", "r"))
-                
+
             elif event.key == pygame.K_m:#Main menu
                 store.mainmenu()
-                
+
             elif event.key == pygame.K_w:#Random key
                 random = easygui.enterbox("Enter your random word", title = "Random Menu")
                 if random == None:
@@ -425,7 +425,7 @@ while 1:
                 if store.dropper4:
                     store.deselectall()
                 else:
-                    store.deselectall()                    
+                    store.deselectall()
                     store.dropper4 = True
                 print store.dropper2
                 print store.dropper3
@@ -441,8 +441,8 @@ while 1:
                 print store.dropper3
                 print store.dropper4
                 print store.dropper5
-                        
-        #the actual drawing that happens when people hold the mouse down-----                
+
+        #the actual drawing that happens when people hold the mouse down-----
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.mouse.get_pos()[0] < store.new[0]:
                 if store.dropper:
@@ -455,7 +455,7 @@ while 1:
                     store.color4 = drawspace.get_at(pygame.mouse.get_pos())
                 elif store.dropper5:
                     store.color5 = drawspace.get_at(pygame.mouse.get_pos())
-                
+
                 elif store.texton:
                     store.drawtext()
                 elif fill == True:
@@ -469,7 +469,7 @@ while 1:
                                 print
                             else:
                                 print j
-                            
+
                     #for pixel in pixelgrid:
                         #for item in pixel:
                             #print item
@@ -483,7 +483,7 @@ while 1:
                     #for index in findall(pixelgrid, value):
                         #print "match at", i
                     pygame.surfarray.blit_array(drawspace, pixelgrid)
-                    
+
                 elif store.line == True:
                     if store.linepos == 1:
                         line1 = pygame.mouse.get_pos()
@@ -499,18 +499,18 @@ while 1:
                     pygame.draw.line(drawspace, store.color, pygame.mouse.get_pos(), pygame.mouse.get_pos(), 1)
                     if len(store.pointlist) > 2:
                         pygame.draw.polygon(drawspace, store.color, store.pointlist, 0)
-                        
+
                 else:
                     if event.button == 1:#Left mouse button(draw)
                         store.down = True
                         store.saved = False
                         testpos = pygame.mouse.get_pos()
-                                    
+
                     elif event.button == 3:#Right mouse button(erase)
                         store.down2 = True
                         pygame.draw.rect(drawspace, [255, 255, 255], [pygame.mouse.get_pos()[0]-(store.bsize)/2, pygame.mouse.get_pos()[1]-(store.bsize)/2, store.bsize, store.bsize], 0)
                         store.saved = False
-      #these control what happens when certain buttons get pressed   
+      #these control what happens when certain buttons get pressed
       #it looks like mouse pos [0] is the x and pos [1] is the y
             else:
                 #new is the image size
@@ -537,7 +537,7 @@ while 1:
                 store.down = False
             elif event.button == 3:#Right mouse button(erase)
                 store.down2 = False
-        
+
     screen.blit(drawspace, [0, 0])
     screen.blit(backimage, [store.new[0], 0])
     screen.blit(brushbox, [store.new[0] + 25, 10])
