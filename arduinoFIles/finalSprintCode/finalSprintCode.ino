@@ -21,8 +21,21 @@ void setup() {
 
 
 void loop(){
- //serial print to 
+ //arduino must wait for input before sending output to python control code
+ //always use println
+ 
+  // serial read section
+  while (Serial.available()) // this will be skipped if no data present, leading to
+                             // the code sitting in the delay function below
+  {
+    delay(30);  //delay to allow buffer to fill 
+    if (Serial.available() >0)
+    {
+      char c = Serial.read();  //gets one byte from serial buffer
+      readString += c; //makes the string readString
+    }
   
+  }
 }
 
 void turnFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds

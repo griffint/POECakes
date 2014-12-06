@@ -29,10 +29,9 @@ void loop() {
 //  delay(1000);
   int i=0;
   
-  linearMotor->step(65,FORWARD,DOUBLE);
-  delay(1500);
-   linearMotor->step(75,BACKWARD,DOUBLE);
-  delay(1500);
+  turnPlatform(20,0);
+  delay(5000);
+  
   
   //turnFrostingMotor(200,0);
   //Serial.print("Delay time");
@@ -100,7 +99,7 @@ void turnPlatform(int steps, int directions){
   while (stepCounter>0){
     Serial.print("turn a step");
     digitalWrite(platformStep, HIGH);
-    delay(25);
+    delay(200);
     digitalWrite(platformStep,LOW);
     stepCounter -= 1;
     delay(200);

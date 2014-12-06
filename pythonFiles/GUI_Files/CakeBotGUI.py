@@ -9,17 +9,41 @@
 
 #Customised for POE use by Griffin Tschurwald. Thank you pie for the base code!
 
-import pygame, sys, easygui, os, serial
+import pygame, sys, easygui, os, serial, numpy, time
 
 #print pygame.version.ver
 fill = False#Remove me!
 
-#===================SERIAL PORT SETUP===========================================================
- #ser = serial.Serial(
-  #   port='/dev/ttyACM0',
-   #  baudrate=9600,
-
-
+#===================SERIAL PORT SETUP AND FUNCTIONS===========================================================
+ser = serial.Serial(
+    port='/dev/ttyACM0',
+    baudrate=9600,
+    timeout=0)
+    
+    #
+def send( theinput ):
+    ser.write( theinput )
+    while True:
+        try:
+            time.sleep(0.01)
+            break
+        except:
+            pass
+    time.sleep(0.1)
+  
+def send_and_receive( theinput ):
+    ser.write( theinput )
+    while True:
+        try:
+            time.sleep(0.01)
+            state = ser.readline()
+            print state
+            return state
+        except:
+            pass
+    time.sleep(0.1)
+    
+    
 # ser.write("23,bottlesj")
 # print ser.read(50)
 #==============================================================================
@@ -198,17 +222,23 @@ class storer():
         if printmenu == "Testing Menu":
             testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Extruding Motor", "Test Lazy Susan Motor"])
             if testmenu == "Test connection":
+                easygui.msgbox("Connection Testing in progress")
                 #test overall connection to cakebot 
         if printmenu == "Printing help":
-            easygui.msgbox("Help me obi wan kenobi")
+            easygui.textbox(msg='Here are some helpful tips for cakebot', title='CakeBot Help', text='', codebox=0)
         if printmenu == "Print Your Design!":
             easygui.msgbox("Printing Sequence Started")
         if printmenu == "Print a preset design":
             presetmenu = easygui.choicebox("Pick a preset design to print to your cake", choices = ["Outside Border","Wavy Border", "Border Near Center"," Wavy Border Near Center"])
                 #Need to write code for printing those choices here
             if presetmenu == "Outside Border":
+                #code to print an outside border here
                 return
-
+                
+                
+    def drawingToCakebot(self): #this function will take whatever is currently drawn and export it to cakebot to print
+        easygui.msgbox("Drawing is now printing!")
+        
 
     def toolmenu(self):
         toolmenu = easygui.buttonbox("Select which tool you want. You are currently using: " + store.toolname, title = "Tool Menu", choices = ["Toggle Color Picker", "Toggle Text Tool", "Toggle Polygon Tool", "No tool", "Cancel"])
@@ -334,6 +364,23 @@ paintbox = pygame.image.load("resources/buckets.gif")
 #The main loop-----------------------------------------------------------------
 while 1:
     clock.tick(30)
+    
+    #-------------------------------------------------------------
+    #CONTROL CODE FOR CAKEBOT GOES HERE
+    #============================================================
+    #good spot for reading the serial early and often here
+    #will do all codes as 3 chars then a semicolon as a linebreak
+    
+    time.sleep(2) #give arduino time to link thru serial
+    cakebotState = "off";
+    ser.readline();
+    
+    
+    #===========================================================
+    #END OF CONTROL CODE FOR CAKEBOT
+    #===========================================================
+    
+    
     #Checks for events---basically user doing anything--------------------------
     for event in pygame.event.get():
         # if they want to exit, let them exit
@@ -344,11 +391,14 @@ while 1:
                     sys.exit()
             else:
                 sys.exit()
-        elif event.type == pygame.USEREVENT:
-            if store.down:
+        elif event.type == pygame.USEREVENT: #if anything happens- this occurs often
+            print("USERVENT HAPPENED")
+            if store.down: #this happens whenever someone tries to draw 
                 testoldpos = testpos
                 testpos = pygame.mouse.get_pos()
-                store.drawline(testoldpos, testpos, store.bsize)
+                #this bit just keeps drawing lines every time mouse if down
+                #this might be a good point to store drawing locations along with brush size and type
+                store.drawline(testoldpos, testpos, store.bsize)   #(point one, point 2, width)
         #Check for key presses
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:#Save menu
@@ -459,8 +509,9 @@ while 1:
                 elif store.texton:
                     store.drawtext()
                 elif fill == True:
-                    pixelgrid = pygame.surfarray.array3d(drawspace)
-                    #print pixelgrid
+                    pixelgrid = pygame.surfarray.array3d(drawspace)#copies pixels from surface to an array
+                    
+                    #print pixelgrid - the array from the surface
                     for i in range(0, len(pixelgrid)):
                         print i
                         for j in range(0, len(pixelgrid[i])):
@@ -537,6 +588,8 @@ while 1:
                 store.down = False
             elif event.button == 3:#Right mouse button(erase)
                 store.down2 = False
+
+#-----end of checking for events----------------
 
     screen.blit(drawspace, [0, 0])
     screen.blit(backimage, [store.new[0], 0])
