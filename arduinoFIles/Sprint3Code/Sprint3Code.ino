@@ -4,25 +4,36 @@
 #include "utility/Adafruit_PWMServoDriver.h"
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+<<<<<<< Updated upstream
 Adafruit_DCMotor *myMotor = AFMS.getMotor(3);
 Adafruit_StepperMotor *linearMotor = AFMS.getStepper(200,1);
+=======
+Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
+Adafruit_StepperMotor *myMotorTwo = AFMS.getStepper(200, 2);
+
+>>>>>>> Stashed changes
 //code for motor shield stepper motor here
 
 //also need code to initialize input ports for switches
-int platformStep = 7;
 
+const int limitOne = 9;
+const int limitTwo = 8;
+const int masterOnOff = 4;
 
 void setup() {
   AFMS.begin();
   myMotor->setSpeed(250);
   linearMotor->setSpeed(30);
   Serial.begin(9600);
-
-  pinMode(platformStep,OUTPUT);
+  
+   pinMode (limitOne, INPUT);
+   pinMode (limitTwo, INPUT);
+   pinMode (masterOnOff, INPUT);
 }
 
 
 void loop() {
+<<<<<<< Updated upstream
   Serial.print("Starting");
 //  turnFrostingMotor(200,0);
 //  Serial.print("Delay time");
@@ -45,6 +56,8 @@ void loop() {
 //  i+=1;
 //  Serial.print(i);
   
+=======
+>>>>>>> Stashed changes
   
   //motor check code
   
@@ -88,12 +101,32 @@ void turnlinearStepper(int steps, int directions){
   
 } 
 
+int limitSwitchOne() {
+  int reading = digitalRead(masterOnOff);
+  int callibrateOne = digitalRead(limitOne);
+  int callibrateTwo = digitalRead(limitTwo);
+    
+ if (reading == LOW) { 
+  //Serial.println("System ON");
+  if (callibrateOne == LOW) { // START ROTATING
+     // myMotor->step(1, FORWARD, MICROSTEP);
+      Serial.println("Pressed");
+    }
+     if (callibrateTwo == LOW) { // ALL FLASHING
+      myMotorTwo->step(0, FORWARD, MICROSTEP);
+      Serial.println("Released"); }
+
+    
+  if (reading == HIGH) {
+    Serial.println("System OFF");}
+}}
 
 //=============this guy will turn a step command into the commands the stepper motor===
 //=================connected to the platform motor needs=================
 void turnPlatform(int steps, int directions){
   //directions will be 0 or 1
   //this motor will use the pololu driver, so will need to use individual steps
+<<<<<<< Updated upstream
   //pin 7 for step 8 for direction
  int stepCounter = steps;
   while (stepCounter>0){
@@ -104,6 +137,9 @@ void turnPlatform(int steps, int directions){
     stepCounter -= 1;
     delay(200);
   }
+=======
+  
+>>>>>>> Stashed changes
 }
   
   
