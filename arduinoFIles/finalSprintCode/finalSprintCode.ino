@@ -50,11 +50,15 @@ String waitReadSerial(){
   }
 }
 
-void turnFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
+void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
   
 }
 
-void moveTopFroster(int steps, int directions){ //this moves the top frosting motor given # of steps
+void turnSideFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
+  
+}
+
+void moveTopStepper(int steps, int directions){ //this moves the top frosting motor given # of steps
   
 }
 
