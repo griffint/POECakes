@@ -16,7 +16,7 @@ void setup() {
   linearMotor->setSpeed(30);
   Serial.begin(9600);
 
-  pinMode(platformStep,OUTPUT);
+
 }
 
 
@@ -24,6 +24,18 @@ void loop(){
  //arduino must wait for input before sending output to python control code
  //always use println
  
+ String serialInput = waitReadSerial();
+  
+ if (serialInput == "CON"){
+   Serial.println("YES");
+ }
+    
+  
+}
+
+
+String waitReadSerial(){
+   while (!Serial.available()) {} // wait for data to arrive
   // serial read section
   while (Serial.available()) // this will be skipped if no data present, leading to
                              // the code sitting in the delay function below
@@ -31,10 +43,10 @@ void loop(){
     delay(30);  //delay to allow buffer to fill 
     if (Serial.available() >0)
     {
+      String readString;
       char c = Serial.read();  //gets one byte from serial buffer
       readString += c; //makes the string readString
     }
-  
   }
 }
 

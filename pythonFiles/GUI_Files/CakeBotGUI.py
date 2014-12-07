@@ -25,7 +25,7 @@ def send( theinput ):
     ser.write( theinput )
     while True:
         try:
-            time.sleep(0.01)
+            time.sleep(0.1)
             break
         except:
             pass
@@ -35,13 +35,16 @@ def send_and_receive( theinput ):
     ser.write( theinput )
     while True:
         try:
-            time.sleep(0.01)
+            time.sleep(0.1)
             state = ser.readline()
             print state
             return state
         except:
             pass
-    time.sleep(0.1)
+    time.sleep(0.1)'
+    
+def connectionCheck(): #this function tests the connection to cakebot
+    
     
     
 # ser.write("23,bottlesj")
