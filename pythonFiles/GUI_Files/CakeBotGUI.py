@@ -20,8 +20,11 @@ ser = serial.Serial(
     baudrate=9600,
     timeout=0)
     
-    #
+    
 def send( theinput ):
+    """
+    This function takes as input a string, then sends it through serial to Arduino
+    """
     ser.write( theinput )
     while True:
         try:
@@ -32,6 +35,10 @@ def send( theinput ):
     time.sleep(0.1)
   
 def send_and_receive( theinput ):
+    """
+    This sends a string to arduino through serial.
+    It then waits for a response from Arduino.
+    """
     ser.write( theinput )
     while True:
         try:
@@ -41,16 +48,26 @@ def send_and_receive( theinput ):
             return state
         except:
             pass
-    time.sleep(0.1)'
+    time.sleep(0.1)
     
-def connectionCheck(): #this function tests the connection to cakebot
-    
+def connectionCheck(): 
+    """
+    This checks connection to cakebot through pyserial.
+    It will return true if connection confirmed
+    """
+    connectionReturn = send_and_receive("CON")
+    if connectionReturn = ("YES"):
+        return True
+
+def moveLinearStepper(steps,direction)
+
     
     
 # ser.write("23,bottlesj")
 # print ser.read(50)
 #==============================================================================
 #Variable storer---------------------------------------------------------------
+
 class storer():
     def __init__(self, newone):#Define all the variables
         self.new = newone #New is the size of the picture
