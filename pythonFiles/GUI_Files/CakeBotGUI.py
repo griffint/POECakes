@@ -20,7 +20,7 @@ ser = serial.Serial(
     baudrate=9600,
     timeout=0)
     
-    #
+    
 def send( theinput ):
     ser.write( theinput )
     while True:
@@ -35,12 +35,12 @@ def send_and_receive( theinput ):
     ser.write( theinput )
     while True:
         try:
-            time.sleep(0.1)
+            time.sleep(0.2)
             state = ser.readline()
             print state
             return state
         except:
-            pass
+            break
     time.sleep(0.1)
     
 def connectionCheck(): 
@@ -131,12 +131,21 @@ def moveSideFroster(time,direction):
         pass
 
 def testTopStepper():
+    result = greenButtonCheck()
+    if result == "up":
+        pass
+        #prompt user to press it here
+    elif result == "down":
+
+
 
 def testPlatformStepper():
 
 def testTopFroster():
 
 def testSideFroster():
+
+def testAllMotors():
 
 def calibrateTopStepper():
 
@@ -145,7 +154,9 @@ def calibratePlatform():
 def calibrateTopFroster():
 
 def calibrateSideFroster():
-    
+
+def calibrateAll():
+
 
     
 # ser.write("23,bottlesj")
