@@ -24,7 +24,22 @@ void loop(){
  //arduino must wait for input before sending output to python control code
  //always use println
  
- String serialInput = waitReadSerial();
+ //need to extract first 3 chars of string to determine code 
+ // then create a string out of the rest of the input
+ String serials = waitReadSerial();
+ String serialInput = "";
+ String serialNumbers = "";   //serialNumbers is the rest of the input code, should always be numbers like steps or time
+ 
+ for (int i=0, i<3, i++){  //needs testing
+    char c = serials.charAt(i);
+    serialInput += c;
+ }
+
+ for (int j=3, i<string.length(serials), i++){ //needs testing
+    char c = serials.charAt(j);
+    serialNumbers += c;
+ }
+
   
  if (serialInput == "CON"){
    Serial.println("YES");
@@ -136,7 +151,7 @@ void turnSideFrostingMotor(int time, int directions){  //this turns the extrudin
    int currentTime = 0;
    startTime=millis();
    int k = 0;
-   while(k<9){
+   while(k<9){//this should check for time being passed instead of k, get rid of k
    
    if (directions==1){
   

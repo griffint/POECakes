@@ -52,7 +52,101 @@ def connectionCheck():
         return True
     else:
         return False
+
+def greenButtonCheck():
+    """Tests whether green button is pressed down or up
+    returns 'down' if down, 'up' if up
+    """
+    result = send_and_receive("GB?")
+    if result == "GBP":
+        return "down"
+    elif result == "GBU":
+        return "up"
+    else:
+        pass
+
+def orangeSwitchCheck():
+    """
+    Tests whether the orange switch is switched to the on or off position
+    returns 'off' or 'on'
+    """
+    result = send_and_receive("OS?")
+    if result == "OSO":
+        return "off"
+    elif result == "OSA":
+        return "on"
+    else:
+        pass
+
+def moveLinearStepper(steps, direction):
+    """
+    moves the stepper motor that controls linear motion of top froster
+    takes as input int 'steps' and int 'direction'
+    direction should be 1(inward) or 0(outward)
+    """
+    if direction == 1:
+        send("LSI" + str(steps))
+    elif direction == 0:
+        send("LSO" + str(steps))
+    else:
+        pass
+
+def movePlatform(steps,direction):
+    """
+    moves the stepper motor controlling the movePlatform
+    takes as input int 'steps' and int 'direction'
+    direction should be 1(clockwise) or 0(counterclockwise)
+    """
+    if direction == 1:
+        send("RPC" + str(steps))
+    elif direction == 0:
+        send("RPN" + str(steps))
+    else:
+        pass
+
+def moveTopFroster(time,direction):
+    """
+    moves the top frosting extruder motor
+    int 'time' is how long it'll move for, int direction is direction
+    direction should be 0 to retract and 1 to extrude frosting
+    """
+    if direction == 1:
+        send("FTD" + str(time))
+    elif direction == 0:
+        send("FTU" + str(time))
+    else:
+        pass
+
+def moveSideFroster(time,direction):
+    """
+    moves the side frosting extruder motor
+    int 'time' is how long it'll move for, int direction is direction
+    direction should be 0 to retract and 1 to extrude frosting
+    """
+    if direction == 1:
+        send("FSD" + str(time))
+    elif direction == 0:
+        send("FSU" + str(time))
+    else:
+        pass
+
+def testTopStepper():
+
+def testPlatformStepper():
+
+def testTopFroster():
+
+def testSideFroster():
+
+def calibrateTopStepper():
+
+def calibratePlatform():
+
+def calibrateTopFroster():
+
+def calibrateSideFroster():
     
+
     
 # ser.write("23,bottlesj")
 # print ser.read(50)
