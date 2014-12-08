@@ -10,7 +10,7 @@ Adafruit_StepperMotor *linearMotor = AFMS.getStepper(200,1);
 //code here to initialize all digital input ports
 
 
-void setup() {
+void setup() { 
   AFMS.begin();
   myMotor->setSpeed(250);
   linearMotor->setSpeed(30);

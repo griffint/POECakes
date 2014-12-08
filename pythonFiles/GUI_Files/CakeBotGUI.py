@@ -41,10 +41,17 @@ def send_and_receive( theinput ):
             return state
         except:
             pass
-    time.sleep(0.1)'
+    time.sleep(0.1)
     
-def connectionCheck(): #this function tests the connection to cakebot
-    
+def connectionCheck(): 
+    """Tests connection to cakebot using send_and_receive
+    doesn't have input, outputs True if succesful, False if not
+    """
+    result = send_and_receive("CON")
+    if result=="YES":
+        return True
+    else:
+        return False
     
     
 # ser.write("23,bottlesj")
