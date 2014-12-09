@@ -508,10 +508,7 @@ while 1:
     #good spot for reading the serial early and often here
     #will do all codes as 3 chars then a semicolon as a linebreak
     
-    time.sleep(2) #give arduino time to link thru serial
-    cakebotState = "off";
-    ser.readline();
-    
+   
     
     #===========================================================
     #END OF CONTROL CODE FOR CAKEBOT
