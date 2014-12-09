@@ -91,16 +91,30 @@ void loop(){
  }
  
  if (serialInput == "RPC"){
-   directions = 1;
+   step = 5;
    spinPlatform();
 }
  
- if (serialInput = "FSU"){
-   directions = 0;
+ if (serialInput == "RPN"){
+   step = -5;
    spinPlatform();
  }
  
+ if (serialInput == "CLS"){
+   calibrateLinear();
+ }
  
+ if (serialInput == "CPS"){
+   calibrateStepper();
+ }
+ 
+ if (serialInput == "GB?"){
+   drawingButton();
+ }
+ 
+ if (serialInput == "OS?"){
+   callibrateLinear();
+ }
  
  }
 
@@ -194,6 +208,8 @@ void moveTopStepper(int steps, int directions){ //this moves the top frosting mo
 }
 
 }
+
+void calibrateLinear(int steps, int directions){
   int limitSwitchOne() {
   int reading = digitalRead(masterOnOff);
   int callibrateOne = digitalRead(limitOne);
@@ -215,10 +231,51 @@ void moveTopStepper(int steps, int directions){ //this moves the top frosting mo
 }}
 }
 
+void drawingButton(int steps, int directions){
+  int exportButton() {
+  int greenReading = digitalRead(greenButton);
+  int orangeReading = digitalRead(masterOnOff);
+    
+ if (orangeReading == LOW) { 
+  //Serial.println("System ON");
+  if (greenReading == LOW) { // START ROTATING
+     linearMotor->step(0, FORWARD, MICROSTEP);
+      Serial.println("Set Go");
+    }
+ 
+  if (greenReading == HIGH) {
+    Serial.println("Paused");}
+}}
+
+}
+
+void calibrateStepper(int steps, int directions){
+  int limitSwitchOne() {
+  int reading = digitalRead(masterOnOff);
+  int callibrateOne = digitalRead(limitOne);
+  int callibrateTwo = digitalRead(limitTwo);
+    
+ if (reading == LOW) { 
+  //Serial.println("System ON");
+  if (callibrateOne == LOW) { // START ROTATING
+      //digitalWrite(platformStep, HIGH);
+      Serial.println("Pressed");
+    }
+     if (callibrateTwo == LOW) {
+      digitalWrite(platformStep, LOW);
+      Serial.println("Released"); }}
+
+    
+  if (reading == HIGH) {
+    Serial.println("System OFF");}
+}}
+}
+
 void spinPlatform(int steps, int directions){ //this spins the cake platform given # of steps
   int stepCounter = steps;
+  //int turn = directions;
   while (stepCounter>0){
-    Serial.print("turn a step");
+    Serial.print("turn a step cw");
     digitalWrite(platformStep, HIGH);
     delay(200);
     digitalWrite(platformStep,LOW);
@@ -226,6 +283,11 @@ void spinPlatform(int steps, int directions){ //this spins the cake platform giv
     delay(200);
   
   while (stepCounter<0){
-    Serial.print(
+    Serial.print("turn a step ccw");
+    digitalWrite(platformStep, LOW);
+    delay(200);
+    digitalWrite(platformStep, HIGH);
+    stepCounter -= 1;
+    delay(200); }
   
 }}
