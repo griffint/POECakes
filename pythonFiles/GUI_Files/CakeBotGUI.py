@@ -20,6 +20,7 @@ ser = serial.Serial(
     baudrate=9600,
     timeout=0)
     
+ser.write("BU")
     
 def send( theinput ):
     """
@@ -57,10 +58,11 @@ def connectionCheck():
     It will return true if connection confirmed
     """
     connectionReturn = send_and_receive("CON")
-    if connectionReturn = ("YES"):
+    if connectionReturn == "YES":
         return True
 
-def moveLinearStepper(steps,direction)
+def moveLinearStepper(steps,direction):
+    pass
 
 
     

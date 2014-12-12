@@ -101,15 +101,16 @@ void loop(){
  }
  
  
- 
+ //===========END OF MAIN LOOP HERE=================
  }
 
 
 String waitReadSerial(){
+  Serial.print("wait Serial is running");
    while (!Serial.available()) {} // wait for data to arrive
   // serial read section
   while (Serial.available()) // this will be skipped if no data present, leading to
-                             // the code sitting in the delay function below
+    Serial.print("data is found");                         // the code sitting in the delay function below
   {
     delay(30);  //delay to allow buffer to fill 
     if (Serial.available() >0)
@@ -117,6 +118,8 @@ String waitReadSerial(){
       String readString;
       char c = Serial.read();  //gets one byte from serial buffer
       readString += c; //makes the string readString
+      Serial.print("The readString is");
+      Serial.print(readString);
     }
   }
 }
