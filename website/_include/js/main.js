@@ -77,10 +77,10 @@ CHAKRA.slider = function(){
 		thumb_links				:	0,			// Individual thumb links for each slide
 		thumbnail_navigation    :   0,			// Thumbnail navigation
 		slides 					:  	[			// Slideshow Images
-											{image : 'Aero Photos & Assets/Team Photos/Griffin with Maja.jpg', title : '<div class="slide-content">Olin</div>', thumb : '', url : ''},
-											{image : 'Aero Photos & Assets/Team Photos/carbonFiber2.jpg', title : '<div class="slide-content">Aero</div>', thumb : '', url : ''},
-											{image : 'Aero Photos & Assets/Team Photos/planeFixing.jpg', title : '<div class="slide-content">Is</div>', thumb : '', url : ''},
-											{image : 'Aero Photos & Assets/Team Photos/majaInFlight.jpg', title : '<div class="slide-content">The Best!</div>', thumb : '', url : ''}  
+											{image : 'Media/Team Photos/Griffin with Maja.jpg', title : '<div class="slide-content">Cakebot</div>', thumb : '', url : ''},
+											{image : 'Media/Team Photos/carbonFiber2.jpg', title : '<div class="slide-content">is</div>', thumb : '', url : ''},
+											{image : 'Media/Team Photos/planeFixing.jpg', title : '<div class="slide-content">super</div>', thumb : '', url : ''},
+											{image : 'Media/Team Photos/majaInFlight.jpg', title : '<div class="slide-content">cool</div>', thumb : '', url : ''}  
 									],
 									
 		// Theme Options			   
