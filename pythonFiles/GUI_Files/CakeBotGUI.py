@@ -20,7 +20,6 @@ ser = serial.Serial(
     baudrate=9600,
     timeout=0)
     
-ser.write("BU")
     
 def send( theinput ):
     """
@@ -41,29 +40,18 @@ def send_and_receive( theinput ):
     It then waits for a response from Arduino.
     """
     ser.write( theinput )
+    time.sleep(.1)
     while True:
         try:
             time.sleep(0.2)
             state = ser.readline()
-            print state
+            
             return state
         except:
 
             pass
     time.sleep(0.1)
     
-def connectionCheck(): 
-    """
-    This checks connection to cakebot through pyserial.
-    It will return true if connection confirmed
-    """
-    connectionReturn = send_and_receive("CON")
-    if connectionReturn == "YES":
-        return True
-
-def moveLinearStepper(steps,direction):
-    pass
-
 
     
 def connectionCheck(): 
@@ -154,33 +142,142 @@ def moveSideFroster(time,direction):
         pass
 
 def testTopStepper():
+    """This function will test the top stepper motor. It'll return True if the motor works,
+    it'll return False if the motor does not. THis does not need any input.
+    """
     result = greenButtonCheck()
     if result == "up":
         pass
         #prompt user to press it here
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newTest = testTopStepper()
+            if newTest == True:
+                return True
+            else:
+                return False
     elif result == "down":
+        moveLinearStepper(20,1)
+        moveLinearStepper(20,0)
+        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        if choices == "YES":
+            easygui.msgbox("This motor is working!")
+            return True
+        if choices == "NO":
+            easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
+            return False
 
 
 
 def testPlatformStepper():
+    """This function will test the platform stepper motor. It'll return True if the motor works,
+    it'll return False if the motor does not. THis does not need any input.
+    """
+    result = greenButtonCheck()
+    if result == "up":
+        pass
+        #prompt user to press it here
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newTest = testPlatformStepper()
+            if newTest == True:
+                return True
+            else:
+                return False
+    elif result == "down":
+        movePlatform(20,1)
+        movePlatform(20,0)
+        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        if choices == "YES":
+            easygui.msgbox("This motor is working!")
+            return True
+        if choices == "NO":
+            easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
+            return False
 
 def testTopFroster():
+    """This function will test the top frosting motor. It'll return True if the motor works,
+    it'll return False if the motor does not. THis does not need any input.
+    """
+    result = greenButtonCheck()
+    if result == "up":
+        pass
+        #prompt user to press it here
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newTest = testTopFroster()
+            if newTest == True:
+                return True
+            else:
+                return False
+    elif result == "down":
+        moveTopFroster(5,1)
+        moveTopFroster(5,0)
+        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        if choices == "YES":
+            easygui.msgbox("This motor is working!")
+            return True
+        if choices == "NO":
+            easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
+            return False
 
 def testSideFroster():
+    """This function will test the side frosting motor. It'll return True if the motor works,
+    it'll return False if the motor does not. THis does not need any input.
+    """
+    result = greenButtonCheck()
+    if result == "up":
+        pass
+        #prompt user to press it here
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newTest = testSideFroster()
+            if newTest == True:
+                return True
+            else:
+                return False
+    elif result == "down":
+        moveSideFroster(5,1)
+        moveSideFroster(5,1)
+        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        if choices == "YES":
+            easygui.msgbox("This motor is working!")
+            return True
+        if choices == "NO":
+            easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
+            return False
 
 def testAllMotors():
+    """
+    This tests all 4 motors. It takes no arguments. It will run all 4 motor test functions.
+    At the end it will give a status report of what motors worked.
+    """
+    top = testTopStepper()
+    platform = testPlatformStepper()
+    topFrost=testTopFroster()
+    sideFrost=testSideFroster()
+    
 
 def calibrateTopStepper():
+    pass
 
 def calibratePlatform():
+    pass
 
 def calibrateTopFroster():
+    pass
 
 def calibrateSideFroster():
+    pass
 
 def calibrateAll():
+    pass
 
-
+def printDesign():
+    """
+    this'll print whatever is on the drawing screen
+    """
+    
     
 # ser.write("23,bottlesj")
 # print ser.read(50)
@@ -218,6 +315,15 @@ class storer():
         self.color5 = [255, 255, 255]
         self.dropper5 = False
         self.selectable = [self.dropper5, self.dropper4, self.dropper3, self.dropper2, self.dropper, self.poly, self.line, self.texton, ]
+        self.drawing_storer = []  
+        #Cakebot state variables here - save state of things like button presses, direction
+        self.topFrostCalibrated = False
+        self.sideFrostCalibrated = False
+        self.topStepCalibrated = False
+        self.platformCalibrated = False
+        self.platformPosition = 0 #saves the platforms position in steps from calibration zero. clockwise is positive
+        
+        
 #Color chooser-----------------------------------------------------------------
     def choosecolor(self):
         short = easygui.buttonbox("Would you like to choose a color off a list, or define your own color", title = "Colors", choices = ["List", "Define", "Cancel"])
@@ -266,22 +372,13 @@ class storer():
 #-------This needs to be changed to tip chooser-------------------------------
 
     def brushchooser(self):
-        newbrush = easygui.buttonbox("Which brush would you like?", title = "Brush Menu", choices = ["Big", "Medium", "Small", "Custom", "Cancel"])
+        newbrush = easygui.buttonbox("Which icing tip would you like?", title = "Tip Menu", choices = ["Skinny tip", "Cancel"])
         if newbrush == "Cancel":
             pass
         else:
-            if newbrush == "Custom":
-                newnewbrush = easygui.enterbox("Enter the brush size as a number.", title = "Custom Brush Menu")
-                if newnewbrush == None:
-                    self.brushchooser()
-                else:
-                    self.bsize = int(newnewbrush)
-            elif newbrush == "Big":
-                self.bsize = 25
-            elif newbrush == "Medium":
+            if newbrush == "Skinny tip":
                 self.bsize = 15
-            elif newbrush == "Small":
-                self.bsize = 5
+           
 
    #Preset pattern picker-----------------------------------------------------------------
 
@@ -356,13 +453,15 @@ class storer():
 
     #This defines the cakebot printing menu. Need to put in better testing code
     def printmenu(self):
-        printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Testing Menu", "Printing help", "Print Your Design!","Print a preset design"])
+        printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Testing Menu", "Calibration Menu", "Printing help", "Print Your Design!","Print a preset design"])
         #The Testing menu needs to have lots of tools to check all of our motors
         if printmenu == "Testing Menu":
-            testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Extruding Motor", "Test Lazy Susan Motor"])
+            testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Extruding Motor", "Test Lazy Susan Motor","Test top frosting motor","Test side frosting motor"])
             if testmenu == "Test connection":
-                easygui.msgbox("Connection Testing in progress")
+                easygui.msgbox("Press OK to test connection to cakebot")
                 #test overall connection to cakebot 
+        if printmenu == "Calibration Menu":
+            #calibration options here
         if printmenu == "Printing help":
             easygui.textbox(msg='Here are some helpful tips for cakebot', title='CakeBot Help', text='', codebox=0)
         if printmenu == "Print Your Design!":
@@ -379,44 +478,44 @@ class storer():
         easygui.msgbox("Drawing is now printing!")
         
 
-    def toolmenu(self):
-        toolmenu = easygui.buttonbox("Select which tool you want. You are currently using: " + store.toolname, title = "Tool Menu", choices = ["Toggle Color Picker", "Toggle Text Tool", "Toggle Polygon Tool", "No tool", "Cancel"])
-        if toolmenu == "No tool":
-            self.dropper = False
-            self.texton = False
-            self.poly = False
-            self.toolname = "Basic Drawing"
-        elif toolmenu == "Toggle Color Picker":
-            self.dropper = True
-            self.texton = False
-            self.poly = False
-            self.toolname = "Color Picker"
-        elif toolmenu == "Toggle Text Tool":
-            self.texton = True
-            self.dropper = False
-            self.poly = False
-            self.toolname = "Text Tool"
-        elif toolmenu == "Toggle Polygon Tool":
-            self.poly = True
-            self.texton = False
-            self.picker = False
-            self.toolname = "Polygon Tool"
+#    def toolmenu(self):
+#        toolmenu = easygui.buttonbox("Select which tool you want. You are currently using: " + store.toolname, title = "Tool Menu", choices = ["Toggle Color Picker", "Toggle Text Tool", "Toggle Polygon Tool", "No tool", "Cancel"])
+#        if toolmenu == "No tool":
+#            self.dropper = False
+#            self.texton = False
+#            self.poly = False
+#            self.toolname = "Basic Drawing"
+#        elif toolmenu == "Toggle Color Picker":
+#            self.dropper = True
+#            self.texton = False
+#            self.poly = False
+#            self.toolname = "Color Picker"
+#        elif toolmenu == "Toggle Text Tool":
+#            self.texton = True
+#            self.dropper = False
+#            self.poly = False
+#            self.toolname = "Text Tool"
+#        elif toolmenu == "Toggle Polygon Tool":
+#            self.poly = True
+#            self.texton = False
+#            self.picker = False
+#            self.toolname = "Polygon Tool"
 
-    def drawtext(self):
-        self.mousepos = pygame.mouse.get_pos()
-        size = easygui.integerbox("Enter the size you want your text:", title = 'Text Tool')
-        print size
-        if size == None:
-            return
-        text = easygui.enterbox("What text would you like printed?", title = 'Text Tool')
-        print text
-        if text == None or text == "":
-            return
-        Font =  pygame.font.Font("resources/annifont.TTF", size)#From fontfile
-        drawtext = Font.render(text, True, self.color)
-        print Font.size(text)
-        drawspace.blit(drawtext, [self.mousepos[0] - Font.size(text)[0]/2, self.mousepos[1] - Font.size(text)[1]/2])
-        self.saved = False
+#    def drawtext(self):
+#        self.mousepos = pygame.mouse.get_pos()
+#        size = easygui.integerbox("Enter the size you want your text:", title = 'Text Tool')
+#        print size
+#        if size == None:
+#            return
+#        text = easygui.enterbox("What text would you like printed?", title = 'Text Tool')
+#        print text
+#        if text == None or text == "":
+#            return
+#        Font =  pygame.font.Font("resources/annifont.TTF", size)#From fontfile
+#        drawtext = Font.render(text, True, self.color)
+#        print Font.size(text)
+#        drawspace.blit(drawtext, [self.mousepos[0] - Font.size(text)[0]/2, self.mousepos[1] - Font.size(text)[1]/2])
+#        self.saved = False
 
     def drawline(self, point_one, point_two, width):
         pygame.draw.line(drawspace, self.color, point_one, point_two, width)
@@ -446,15 +545,8 @@ def newfile():
     open_or_new = easygui.buttonbox("Welcome to CakeBot", title = "CakeBot", choices = ["New File", "Open", "Exit"])
     if open_or_new == "New File":
         store.loadpic = False
-        fieldValues = easygui.multenterbox(msg, title, fieldNames)
-        if fieldValues == None:
-            newfile()
-        else:
-            try:
-                store.new = [int(fieldValues[1]), int(fieldValues[0])]
-            except:
-                easygui.msgbox("All fields must be filled with whole numbers", title = "Input error")
-                newfile()
+        store.new = [int(800), int(800)] #sets the size of the drawing box
+        
     elif open_or_new == "Open":
         store.loadpic = True
         question = easygui.fileopenbox()
@@ -495,7 +587,7 @@ pygame.time.set_timer(pygame.USEREVENT, 25)
 backimage = pygame.image.load("resources/back.gif")
 brushbox = pygame.image.load("resources/brush.gif")
 colortext = pygame.image.load("resources/color.gif")
-toolbox = pygame.image.load("resources/tools.gif")
+
 menubox = pygame.image.load("resources/menu.gif")
 pallette1 = pygame.image.load("resources/pallette1.gif")
 paintbox = pygame.image.load("resources/buckets.gif")
@@ -528,13 +620,24 @@ while 1:
             else:
                 sys.exit()
         elif event.type == pygame.USEREVENT: #if anything happens- this occurs often
-            print("USERVENT HAPPENED")
+        
             if store.down: #this happens whenever someone tries to draw 
                 testoldpos = testpos
                 testpos = pygame.mouse.get_pos()
                 #this bit just keeps drawing lines every time mouse if down
                 #this might be a good point to store drawing locations along with brush size and type
                 store.drawline(testoldpos, testpos, store.bsize)   #(point one, point 2, width)
+                if len(store.drawing_storer) >0 :
+                    
+                    if store.drawing_storer[-1] !=[testoldpos,testpos]:
+                        store.drawing_storer.append([testoldpos,testpos])
+                        print len(store.drawing_storer)
+                        
+                elif len(store.drawing_storer) == 0 :
+                    store.drawing_storer.append([testoldpos,testpos])
+                #check for any duplicates
+                
+                
         #Check for key presses
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:#Save menu
@@ -627,6 +730,8 @@ while 1:
                 print store.dropper3
                 print store.dropper4
                 print store.dropper5
+            elif event.key == pygame.K_F5:
+                print store.drawing_storer
 
         #the actual drawing that happens when people hold the mouse down-----
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -705,8 +810,7 @@ while 1:
                     store.brushchooser()
                 elif pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>70 and pygame.mouse.get_pos()[1]<120:
                     store.choosecolor()
-                elif pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>130 and pygame.mouse.get_pos()[1]<180:
-                    store.toolmenu()
+               
                 elif pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>190 and pygame.mouse.get_pos()[1]<240:
                     store.mainmenu()
                 elif pygame.mouse.get_pos()[0]>store.new                                                                                                                                                                                                                                                                                                                [0]+100 and pygame.mouse.get_pos()[0]<store.new[0]+220 and pygame.mouse.get_pos()[1]>10 and pygame.mouse.get_pos()[1]<130:
@@ -736,7 +840,7 @@ while 1:
     pygame.draw.rect(screen, store.color4, [store.new[0] + 145, 150, 15, 15], 0)
     pygame.draw.rect(screen, store.color5, [store.new[0] + 165, 150, 15, 15], 0)
     screen.blit(colortext, [store.new[0] + 25, 70])
-    screen.blit(toolbox, [store.new[0] + 25, 130])
+    
     screen.blit(menubox, [store.new[0] + 25, 190])
     screen.blit(pallette1, [store.new[0] + 100, 10])
     screen.blit(paintbox, [store.new[0]+ 100, 145])

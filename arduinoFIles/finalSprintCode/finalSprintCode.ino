@@ -123,23 +123,24 @@ void loop(){
 
 
 String waitReadSerial(){
-  Serial.print("wait Serial is running");
+  
    while (!Serial.available()) {} // wait for data to arrive
   // serial read section
   while (Serial.available()) // this will be skipped if no data present, leading to
-    Serial.print("data is found");                         // the code sitting in the delay function below
+                            // the code sitting in the delay function below
   {
-    delay(30);  //delay to allow buffer to fill 
+    delay(80);  //delay to allow buffer to fill 
     if (Serial.available() >0)
     {
       String readString;
       char c = Serial.read();  //gets one byte from serial buffer
       readString += c; //makes the string readString
-      Serial.print("The readString is");
-      Serial.print(readString);
+      
     }
   }
+  return readString;
 }
+
 
 void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
    myMotor->setSpeed(220);

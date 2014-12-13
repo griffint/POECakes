@@ -5,7 +5,31 @@ Created on Tue Nov 11 14:14:09 2014
 @author: griffint
 """
 
-from time import sleep
+import time
 import serial
 ser = serial.Serial('/dev/ttyACM0', 9600) # Establish the connection on a specific port
-ser.write("PUTIN")
+
+def send_and_receive( theinput ):
+    """
+    This sends a string to arduino through serial.
+    It then waits for a response from Arduino.
+    """
+    ser.write( theinput )
+    time.sleep(.3)
+    while True:
+        try:
+            time.sleep(.1)
+            state = ser.readline()
+            
+            return state
+        except:
+
+            pass
+    print("My while loop gave up")
+    time.sleep(0.1)
+    
+if __name__ == "__main__":
+    print(send_and_receive("PUTIN"))
+    print("putin should be here")
+    time.sleep(1)
+    print(send_and_receive("COCKS"))
