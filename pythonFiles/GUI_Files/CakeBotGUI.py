@@ -26,13 +26,7 @@ def send( theinput ):
     This function takes as input a string, then sends it through serial to Arduino
     """
     ser.write( theinput )
-    while True:
-        try:
-            time.sleep(0.1)
-            break
-        except:
-            pass
-    time.sleep(0.1)
+    time.sleep(.5)
   
 def send_and_receive( theinput, timeout_time):
     """
@@ -103,6 +97,7 @@ def moveLinearStepper(steps, direction):
     moves the stepper motor that controls linear motion of top froster
     takes as input int 'steps' and int 'direction'
     direction should be 1(inward) or 0(outward)
+    doesn't return anything and doesn't need to wait for feedback from arduino
     """
     if direction == 1:
         send("LSI" + str(steps))
@@ -116,6 +111,7 @@ def movePlatform(steps,direction):
     moves the stepper motor controlling the movePlatform
     takes as input int 'steps' and int 'direction'
     direction should be 1(clockwise) or 0(counterclockwise)
+    doesn't return anything and doesn't need to wait for feedback from arduino
     """
     if direction == 1:
         send("RPC" + str(steps))
@@ -129,6 +125,7 @@ def moveTopFroster(time,direction):
     moves the top frosting extruder motor
     int 'time' is how long it'll move for, int direction is direction
     direction should be 0 to retract and 1 to extrude frosting
+    doesn't return anything and doesn't need to wait for feedback from arduino
     """
     if direction == 1:
         send("FTD" + str(time))
@@ -142,6 +139,7 @@ def moveSideFroster(time,direction):
     moves the side frosting extruder motor
     int 'time' is how long it'll move for, int direction is direction
     direction should be 0 to retract and 1 to extrude frosting
+    doesn't return anything and doesn't need to wait for feedback from arduino
     """
     if direction == 1:
         send("FSD" + str(time))
@@ -280,6 +278,7 @@ def testAllMotors():
     """
     This tests all 4 motors. It takes no arguments. It will run all 4 motor test functions.
     At the end it will give a status report of what motors worked.
+    and return a list of 4 booleans corresponding to top, platform, topfrost, and sidefrost motors being tested
     """
     easygui.msgbox("Press OK to test all motors")
     top = testTopStepper()
@@ -310,6 +309,7 @@ def testAllMotors():
         
         
     easygui.msgbox(topTestText + platformTestText + topFrostText + sideFrostText + "Exit testing routine")
+    return [top,platform,topFrost,sideFrost]
 
 def calibrateTopStepper():
     """
@@ -347,7 +347,7 @@ def calibrateTopStepper():
 
 def calibratePlatform():
     """
-    This will calibrate the stepper motor on top of the cakebot, using the limit switch as a zero reference point. 
+    This will calibrate the platform on top of the cakebot, using the limit switch as a zero reference point. 
     Takes no inputs, returns True if user calibrates, false if something weird goes wrong.
     It moves the stepper bit by bit until it detects the limit switch is depressed
     Correct direction to spin to be determined through manual testing
@@ -359,7 +359,7 @@ def calibratePlatform():
     if result == "up":
         choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
         if choices == "It's pressed!":
-            newResult = calibrateTopStepper()
+            newResult = calibratePlatform()
             if newResult == True:
                 return True
             elif newResult == False:
@@ -368,9 +368,9 @@ def calibratePlatform():
                 return False
             
     elif result == "down":
-        result = send_and_receive("CLS",60)
-        if result == "LSC":
-            easygui.msgbox(msg="Linear Stepper has been calibrated")
+        result = send_and_receive("CPS",60)
+        if result == "PSC":
+            easygui.msgbox(msg="Platform Stepper has been calibrated")
             return True
         else:
             easygui.msgbox(msg="Stepper not calibrated")
@@ -378,7 +378,7 @@ def calibratePlatform():
 
 def calibrateTopFroster():
     """
-    This will calibrate the stepper motor on top of the cakebot, using the limit switch as a zero reference point. 
+    This will calibrate the frosting motor on top of cakebot, using user input as zero point.
     Takes no inputs, returns True if user calibrates, false if something weird goes wrong.
     It moves the stepper bit by bit until it detects the limit switch is depressed
     Correct direction to spin to be determined through manual testing
@@ -390,7 +390,7 @@ def calibrateTopFroster():
     if result == "up":
         choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
         if choices == "It's pressed!":
-            newResult = calibrateTopStepper()
+            newResult = calibrateTopFroster()
             if newResult == True:
                 return True
             elif newResult == False:
@@ -399,9 +399,9 @@ def calibrateTopFroster():
                 return False
             
     elif result == "down":
-        result = send_and_receive("CLS",60)
-        if result == "LSC":
-            easygui.msgbox(msg="Linear Stepper has been calibrated")
+        result = send_and_receive("CTF",60)
+        if result == "TFC":
+            easygui.msgbox(msg="Top froster has been calibrated")
             return True
         else:
             easygui.msgbox(msg="Stepper not calibrated")
@@ -409,7 +409,7 @@ def calibrateTopFroster():
 
 def calibrateSideFroster():
     """
-    This will calibrate the stepper motor on top of the cakebot, using the limit switch as a zero reference point. 
+    This will calibrate the frosting motor on top of cakebot, using user input as a 0 point.  
     Takes no inputs, returns True if user calibrates, false if something weird goes wrong.
     It moves the stepper bit by bit until it detects the limit switch is depressed
     Correct direction to spin to be determined through manual testing
@@ -430,16 +430,46 @@ def calibrateSideFroster():
                 return False
             
     elif result == "down":
-        result = send_and_receive("CLS",60)
-        if result == "LSC":
-            easygui.msgbox(msg="Linear Stepper has been calibrated")
+        result = send_and_receive("CSF",60)
+        if result == "SFC":
+            easygui.msgbox(msg="Side froster has been calibrated")
             return True
         else:
             easygui.msgbox(msg="Stepper not calibrated")
             return False
 
 def calibrateAll():
-    pass
+    easygui.msgbox("Ready to calibrate all the motors? Press OK when you're ready!")
+    top = calibrateTopStepper()
+    platform = calibratePlatform()
+    topFrost = calibrateTopFroster()
+    sideFrost = calibrateSideFroster()
+    
+    topTestText = "Top Motor not properly calibrated \n"
+    platformTestText = "Platform not properly calibrated \n"
+    topFrostText = "Top froster not properly calibrated \n"
+    sideFrostText = "Side froster not properly calibrated \n"
+    
+    if top == True:
+        topTestText = "Top Motor calibrated \n"
+    
+        
+    if platform == True:
+        platformTestText = "Platform calibrated \n"
+    
+        
+    if topFrost ==True:
+        topFrostText = "Top froster calibrated \n"
+
+        
+    if sideFrost == True:
+        sideFrostText = "Side froster calibrated \n"
+    
+        
+        
+    easygui.msgbox(topTestText + platformTestText + topFrostText + sideFrostText + "Exit testing routine")
+    return [top,platform,topFrost,sideFrost]
+    
 
 def printDesign():
     """
@@ -495,6 +525,7 @@ class storer():
         self.sideFrostTested = False
         self.topStepTested = False
         self.platformTested = False
+        
         
         
         
@@ -627,10 +658,11 @@ class storer():
 
     #This defines the cakebot printing menu. Need to put in better testing code
     def printmenu(self):
-        printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Testing Menu", "Calibration Menu", "Printing help", "Print Your Design!","Print a preset design"])
+        printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Testing Menu", "Calibration Menu", "Printing help", "Print Your Design!","Print a preset design", "Manual Control"])
         #The Testing menu needs to have lots of tools to check all of our motors
         if printmenu == "Testing Menu":
-            testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Extruding Motor", "Test Lazy Susan Motor","Test top frosting motor","Test side frosting motor", "Test all motors" ])
+            
+            testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Linear Stepper Motor", "Test Lazy Susan Motor","Test top frosting motor","Test side frosting motor", "Test all motors" ])
             if testmenu == "Test connection":
                 easygui.msgbox("Press OK to test connection to cakebot")
                 connectResult = connectionCheck()
@@ -638,21 +670,114 @@ class storer():
                     easygui.msgbox("connected to cakebot!!!")
                 elif connectResult == False:
                     easygui.msgbox("connection failed")
+            if testmenu == "Test Lazy Susan Motor":
+                testResult = testPlatformStepper()
+                if testResult == True:
+                    self.platformTested = True
+                else:
+                    pass
+            if testmenu == "Test Linear Stepper Motor":
+                testResult = testTopStepper()
+                if testResult == True:
+                    self.topStepTested = True
+                else:
+                    pass
+            if testmenu == "Test top frosting motor":
+                testResult = testTopFroster()
+                if testResult == True:
+                    self.topFrostTested = True
+                else:
+                    pass
+            if testmenu == "Test side frosting motor":
+                testResult = testSideFroster()
+                if testResult == True:
+                    self.sideFrostTested = True
+                else:
+                    pass
             if testmenu == "Test all motors":
-                testAllMotors()
+                testList = testAllMotors()
+                if all(testList) == True:
+                    easygui.msgbox("ALl motors succesfully tested")
+                    self.platformTested = True
+                    self.topStepTested = True
+                    self.sideFrostTested = True
+                    self.topFrostTested = True
+                else:
+                    easygui.msgbox("SOmething went wrong with testing. Please test the motors that were listed as not working")
+                
         if printmenu == "Calibration Menu":
-            pass
-            #calibration options here
+            calibrationmenu = easygui.choicebox("Calibration Menu for Cakebot", choices = ["Calibrate Platform", "Calibrate Top Stepper", "Calibrate Top Froster", "Calibrate Side Froster", "Calibrate all"])
+            if calibrationmenu == "Calibrate Platform":
+                calResult = calibratePlatform()
+                if calResult == True:
+                    self.platformCalibrated = True
+                    self.platformPosition = 0
+                else:
+                    pass
+            if calibrationmenu == "Calibrate Top Stepper":
+                calResult = calibrateTopStepper()
+                if calResult == True:
+                    self.topStepCalibrated = True
+                    self.topStepperPosition = 0
+                else:   
+                    pass
+            if calibrationmenu == "Calibrate Top Froster":
+                calResult = calibrateTopFroster()
+                if calResult == True:
+                    self.topFrostCalibrated = True
+                else:
+                    pass
+            if calibrationmenu == "Calibrate Side Froster":
+                calResult = calibrateSideFroster()
+                if calResult == True:
+                    self.sideFrostCalibrated = True
+                else:
+                    pass
+            if calibrationmenu == "Calibrate all":
+                calibList = calibrateAll()
+                if all(calibList) == True:
+                    easygui.msgbox("All motors succesfully calibrated")
+                    self.platformCalibrated = True
+                    self.platformPosition = True
+                    self.topStepCalibrated = True
+                    self.topStepperPosition = 0
+                    self.topFrostCalibrated = True
+                    self.sideFrostCalibrated = True
+                else:
+                    pass
+                
         if printmenu == "Printing help":
-            easygui.textbox(msg='Here are some helpful tips for cakebot', title='CakeBot Help', text='', codebox=0)
+            easygui.textbox(msg='Here are some helpful tips for cakebot', title='CakeBot Help', text='Ask griffin cause this program is weird', codebox=0)
         if printmenu == "Print Your Design!":
-            easygui.msgbox("Printing Sequence Started")
+            easygui.msgbox("Printing Sequence Starting when OK pressed")
         if printmenu == "Print a preset design":
             presetmenu = easygui.choicebox("Pick a preset design to print to your cake", choices = ["Outside Border","Wavy Border", "Border Near Center"," Wavy Border Near Center"])
                 #Need to write code for printing those choices here
             if presetmenu == "Outside Border":
                 #code to print an outside border here
                 return
+        if printmenu == "Manual Control":
+            exitmenu = False
+            while exitmenu == False:
+                manualmenu = easygui.buttonbox(msg="Manual Control: press buttons to control cakebot", choices = ("Platform Clockwise", "Platform Counterclockwise", "Top Stepper In", "Top Stepper Out", "Top Froster Out", "Top Froster In", "Side Froster Out", "Side Froster In" , "Exit"))
+                if manualmenu == "Platform Clockwise":
+                    movePlatform(5,1)
+                elif manualmenu == "Platform Counterclockwise":
+                    movePlatform(5,0)
+                elif manualmenu == "Top Stepper In":
+                    moveLinearStepper(20,1)
+                elif manualmenu == "Top Stepper Out":
+                    moveLinearStepper(20,0)
+                elif manualmenu == "Top Froster Out":
+                    moveTopFroster(2,1)
+                elif manualmenu == "Top Froster In":
+                    moveTopFroster(2,0)
+                elif manualmenu == "Side Froster Out":
+                    moveSideFroster(2,1)
+                elif manualmenu == "Side Froster In":
+                    moveSideFroster(2,0)
+                elif manualmenu == "Exit":
+                    exitmenu = True
                 
                 
     def drawingToCakebot(self): #this function will take whatever is currently drawn and export it to cakebot to print
@@ -821,6 +946,7 @@ while 1:
                 
         #Check for key presses
         elif event.type == pygame.KEYDOWN:
+            
             if event.key == pygame.K_s:#Save menu
                 store.save()
 
@@ -913,6 +1039,7 @@ while 1:
                 print store.dropper5
             elif event.key == pygame.K_F5:
                 print store.drawing_storer
+            
 
         #the actual drawing that happens when people hold the mouse down-----
         elif event.type == pygame.MOUSEBUTTONDOWN:
