@@ -18,7 +18,7 @@ fill = False#Remove me!
 ser = serial.Serial(
     port='/dev/ttyACM0',
     baudrate=9600,
-    timeout=10)
+    timeout=5)
     
     
 def send( theinput ):
@@ -34,12 +34,13 @@ def send( theinput ):
             pass
     time.sleep(0.1)
   
-def send_and_receive( theinput ):
+def send_and_receive( theinput, timeout_time):
     """
     This sends a string to arduino through serial.
     It then waits for a response from Arduino.
+    timeout_time is how long it'll wait for a response in seconds
     """
-    
+    ser.timeout=timeout_time
     time.sleep(.05)
     while True:
         
@@ -62,7 +63,7 @@ def connectionCheck():
     """Tests connection to cakebot using send_and_receive
     doesn't have input, outputs True if succesful, False if not
     """
-    result = str(send_and_receive("CON"))
+    result = str(send_and_receive("CON",5))
    
     if result == 'YES':
         print("connected to cakebot")
@@ -75,7 +76,7 @@ def greenButtonCheck():
     """Tests whether green button is pressed down or up
     returns 'down' if down, 'up' if up
     """
-    result = send_and_receive("GB?")
+    result = send_and_receive("GB?",5)
     
     if result == "GBP":
         return "down"
@@ -89,7 +90,7 @@ def orangeSwitchCheck():
     Tests whether the orange switch is switched to the on or off position
     returns 'off' or 'on'
     """
-    result = send_and_receive("OS?")
+    result = send_and_receive("OS?",5)
     if result == "OSO":
         return "off"
     elif result == "OSA":
@@ -155,7 +156,7 @@ def testTopStepper():
     """
     result = greenButtonCheck()
     if result == "up":
-        pass
+        
         #prompt user to press it here
         choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
         if choices == "It's pressed!":
@@ -164,6 +165,8 @@ def testTopStepper():
                 return True
             else:
                 return False
+        elif choices == "Exit":
+            return False
     elif result == "down":
         moveLinearStepper(20,1)
         moveLinearStepper(20,0)
@@ -186,7 +189,7 @@ def testPlatformStepper():
     """
     result = greenButtonCheck()
     if result == "up":
-        pass
+        
         #prompt user to press it here
         choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
         if choices == "It's pressed!":
@@ -195,6 +198,8 @@ def testPlatformStepper():
                 return True
             else:
                 return False
+        elif choices == "Exit":
+            return False
     elif result == "down":
         movePlatform(20,1)
         movePlatform(20,0)
@@ -215,7 +220,7 @@ def testTopFroster():
     """
     result = greenButtonCheck()
     if result == "up":
-        pass
+        
         #prompt user to press it here
         choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
         if choices == "It's pressed!":
@@ -224,6 +229,8 @@ def testTopFroster():
                 return True
             else:
                 return False
+        elif choices == "Exit":
+            return False
     elif result == "down":
         moveTopFroster(5,1)
         moveTopFroster(5,0)
@@ -244,7 +251,7 @@ def testSideFroster():
     """
     result = greenButtonCheck()
     if result == "up":
-        pass
+      
         #prompt user to press it here
         choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
         if choices == "It's pressed!":
@@ -253,6 +260,8 @@ def testSideFroster():
                 return True
             else:
                 return False
+        elif choices == "Exit":
+            return False
     elif result == "down":
         moveSideFroster(5,1)
         moveSideFroster(5,1)
@@ -303,16 +312,131 @@ def testAllMotors():
     easygui.msgbox(topTestText + platformTestText + topFrostText + sideFrostText + "Exit testing routine")
 
 def calibrateTopStepper():
-    pass
+    """
+    This will calibrate the stepper motor on top of the cakebot, using the limit switch as a zero reference point. 
+    Takes no inputs, returns True if user calibrates, false if something weird goes wrong.
+    It moves the stepper bit by bit until it detects the limit switch is depressed
+    Correct direction to spin to be determined through manual testing
+    returns True if calibrated, False otherwise
+    """
+    
+    result = greenButtonCheck()
+    
+    if result == "up":
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newResult = calibrateTopStepper()
+            if newResult == True:
+                return True
+            elif newResult == False:
+                return False
+        elif choices == "Exit":
+                return False
+            
+    elif result == "down":
+        result = send_and_receive("CLS",60)
+        if result == "LSC":
+            easygui.msgbox(msg="Linear Stepper has been calibrated")
+            return True
+        else:
+            easygui.msgbox(msg="Stepper not calibrated")
+            return False
+            
+    
+    
 
 def calibratePlatform():
-    pass
+    """
+    This will calibrate the stepper motor on top of the cakebot, using the limit switch as a zero reference point. 
+    Takes no inputs, returns True if user calibrates, false if something weird goes wrong.
+    It moves the stepper bit by bit until it detects the limit switch is depressed
+    Correct direction to spin to be determined through manual testing
+    returns True if calibrated, False otherwise
+    """
+    
+    result = greenButtonCheck()
+    
+    if result == "up":
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newResult = calibrateTopStepper()
+            if newResult == True:
+                return True
+            elif newResult == False:
+                return False
+        elif choices == "Exit":
+                return False
+            
+    elif result == "down":
+        result = send_and_receive("CLS",60)
+        if result == "LSC":
+            easygui.msgbox(msg="Linear Stepper has been calibrated")
+            return True
+        else:
+            easygui.msgbox(msg="Stepper not calibrated")
+            return False
 
 def calibrateTopFroster():
-    pass
+    """
+    This will calibrate the stepper motor on top of the cakebot, using the limit switch as a zero reference point. 
+    Takes no inputs, returns True if user calibrates, false if something weird goes wrong.
+    It moves the stepper bit by bit until it detects the limit switch is depressed
+    Correct direction to spin to be determined through manual testing
+    returns True if calibrated, False otherwise
+    """
+    
+    result = greenButtonCheck()
+    
+    if result == "up":
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newResult = calibrateTopStepper()
+            if newResult == True:
+                return True
+            elif newResult == False:
+                return False
+        elif choices == "Exit":
+                return False
+            
+    elif result == "down":
+        result = send_and_receive("CLS",60)
+        if result == "LSC":
+            easygui.msgbox(msg="Linear Stepper has been calibrated")
+            return True
+        else:
+            easygui.msgbox(msg="Stepper not calibrated")
+            return False
 
 def calibrateSideFroster():
-    pass
+    """
+    This will calibrate the stepper motor on top of the cakebot, using the limit switch as a zero reference point. 
+    Takes no inputs, returns True if user calibrates, false if something weird goes wrong.
+    It moves the stepper bit by bit until it detects the limit switch is depressed
+    Correct direction to spin to be determined through manual testing
+    returns True if calibrated, False otherwise
+    """
+    
+    result = greenButtonCheck()
+    
+    if result == "up":
+        choices = easygui.buttonbox(msg="Please press down the green button!",title="Green button checker",choices=["It's pressed!","Exit"])
+        if choices == "It's pressed!":
+            newResult = calibrateTopStepper()
+            if newResult == True:
+                return True
+            elif newResult == False:
+                return False
+        elif choices == "Exit":
+                return False
+            
+    elif result == "down":
+        result = send_and_receive("CLS",60)
+        if result == "LSC":
+            easygui.msgbox(msg="Linear Stepper has been calibrated")
+            return True
+        else:
+            easygui.msgbox(msg="Stepper not calibrated")
+            return False
 
 def calibrateAll():
     pass
@@ -366,7 +490,12 @@ class storer():
         self.topStepCalibrated = False
         self.platformCalibrated = False
         self.platformPosition = 0 #saves the platforms position in steps from calibration zero. clockwise is positive
-        self.topFrostPosition = 0 #saved as steps from calibration 0
+        self.topStepperPosition = 0 #saved as steps from calibration 0
+        self.topFrostTested = False
+        self.sideFrostTested = False
+        self.topStepTested = False
+        self.platformTested = False
+        
         
         
 #Color chooser-----------------------------------------------------------------

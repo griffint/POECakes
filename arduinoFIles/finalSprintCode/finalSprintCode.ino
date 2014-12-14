@@ -44,6 +44,7 @@ void loop(){
  if (serialInput == "CON"){
    Serial.println("YES");
  }
+ 
  if (serialInput == "TLS"){
    moveTopStepper();
  }
@@ -141,6 +142,9 @@ String waitReadSerial(){
   return readString;
 }
 
+//============TODO==============
+//have this actually spin for the designated time
+//================TODO OVER===================
 
 void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
    myMotor->setSpeed(220);
@@ -152,11 +156,11 @@ void turnTopFrostingMotor(int time, int directions){  //this turns the extruding
    
    if (directions==1){
   
-   myMotor->run(FORWARD);//backward equates to down
- }
- else{
-   myMotor->run(BACKWARD);//backward equates to down
- }
+       myMotor->run(FORWARD);//backward equates to down
+     }
+    else{
+       myMotor->run(BACKWARD);//backward equates to down
+     }
    int currentTime = millis();
    delay(500);
    Serial.print("in loop");
@@ -165,6 +169,10 @@ void turnTopFrostingMotor(int time, int directions){  //this turns the extruding
  }
  myMotor->run(RELEASE);
 }
+
+//===============TODO===================
+//have this spin for the actual correct time
+//====================TODO OVER================
 
 void turnSideFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
   myExtruder->setSpeed(220);
@@ -190,6 +198,7 @@ void turnSideFrostingMotor(int time, int directions){  //this turns the extrudin
  myExtruder->run(RELEASE);
 }
 
+
 void moveTopStepper(int steps, int directions){ //this moves the top frosting motor given # of steps
   linearMotor->setSpeed(220);
    int startTime = 0;
@@ -213,8 +222,8 @@ void moveTopStepper(int steps, int directions){ //this moves the top frosting mo
  }
   linearMotor->run(RELEASE);
 }
-
 }
+
 
 void calibrateLinear(int steps, int directions){
   int limitSwitchOne() {
@@ -238,6 +247,7 @@ void calibrateLinear(int steps, int directions){
 }}
 }
 
+
 void drawingButton(int steps, int directions){
   int exportButton() {
   int greenReading = digitalRead(greenButton);
@@ -255,6 +265,7 @@ void drawingButton(int steps, int directions){
 }}
 
 }
+
 
 void calibrateStepper(int steps, int directions){
   int limitSwitchOne() {
@@ -277,6 +288,7 @@ void calibrateStepper(int steps, int directions){
     Serial.println("System OFF");}
 }}
 }
+
 
 void spinPlatform(int steps, int directions){ //this spins the cake platform given # of steps
   int stepCounter = steps;
