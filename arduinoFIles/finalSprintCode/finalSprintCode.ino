@@ -8,14 +8,19 @@ Adafruit_DCMotor *myExtruder = AFMS.getMotor(4);
 Adafruit_DCMotor *myMotor = AFMS.getMotor(3);
 Adafruit_StepperMotor *linearMotor = AFMS.getStepper(200,1);
 
-//code here to initialize all digital input ports
+//code here to initialize all digital I/O ports as ints
+int platformLimit = 10;
+int platformDirection = 11;
 
 
 void setup() { 
   AFMS.begin();
-  
   Serial.begin(9600);
-
+  
+  //set pinMode for every digital I/O pin
+  pinMode(platformLimit, INPUT);
+  pinMode(platformDirection, OUTPUT)
+  
 }
 
 
@@ -39,10 +44,29 @@ void loop(){
     serialNumbers += c;
  }
 
-  
- if (serialInput == "CON"){
-   Serial.println("YES");
- }
+switch (serialInput) {
+  case "CON":  //connection check
+    Serial.println("YES");
+    break;
+  case "GB?": //green button check
+    break;
+  case "OS?":
+    break;
+  case "LSI":
+    moveTopStepper(serialNumbers,1);
+    break;
+  case "LSO":
+    moveTopStepper(serialNumbers,0);
+    break;
+  case "RPC":
+    spinPlatform(serialNumbers,1);
+    break;
+  case "RPN":
+    spinPlatform(serialNumbers,0);
+    break;
+
+}
+
  
  if (serialInput == "TLS"){
    moveTopStepper();
@@ -58,16 +82,6 @@ void loop(){
  
  if (serialInput == "TFS"){
    turnSideFrostingMotor();
- }
- 
- if (serialInput == "LSI"){
-   directions = 1;
-   moveTopStepper();
- }
- 
- if (serialInput == "LSO"){
-   directions = 0;
-   moveTopStepper();
  }
  
  if (serialInput == "FTD"){
@@ -90,16 +104,6 @@ void loop(){
    turnSideFrostingMotor();
  }
  
- if (serialInput == "RPC"){
-   step = 5;
-   spinPlatform();
-}
- 
- if (serialInput == "RPN"){
-   step = -5;
-   spinPlatform();
- }
- 
  if (serialInput == "CLS"){
    calibrateLinear();
  }
@@ -107,16 +111,7 @@ void loop(){
  if (serialInput == "CPS"){
    calibrateStepper();
  }
- 
 
-
- if (serialInput == "GB?"){
-   drawingButton();
- }
- 
- if (serialInput == "OS?"){
-   callibrateLinear();
- }
 
  }
  
@@ -194,15 +189,21 @@ void moveTopStepper(int steps, int directions){
   //this moves the top frosting motor given # of steps
   //directions should be 1 to move inward, 0 for out
   linearMotor->setSpeed(60);
-  
-  
+  byte spinDir = 0;
+  if (directions == 1){
+    spinDir = FORWARD;
+  }
+  else if (directions == 0){
+    spinDir = BACKWARD;
+  }
+  linearMotor.step(steps, spinDir,SINGLE) 
  
-  linearMotor->run(RELEASE);
+  linearMotor.release();
 }
 
 
 
-void calibrateLinear(int steps, int directions){
+void calibrateTopStepper(){
   int limitSwitchOne() {
   int reading = digitalRead(masterOnOff);
   int callibrateOne = digitalRead(limitOne);
@@ -225,7 +226,7 @@ void calibrateLinear(int steps, int directions){
 }
 
 
-void drawingButton(int steps, int directions){
+void greenButton(int steps, int directions){
   int exportButton() {
   int greenReading = digitalRead(greenButton);
   int orangeReading = digitalRead(masterOnOff);
@@ -268,23 +269,20 @@ void calibrateStepper(int steps, int directions){
 
 
 
-void spinPlatform(int steps, int directions){ //this spins the cake platform given # of steps
+void spinPlatform(int steps, int directions){ 
+  //this spins the cake platform given # of steps
+  //direction of 1 should mean clockwise, 0 = counterclockwise
+  //no outputs
   int stepCounter = steps;
-  //int turn = directions;
+  digitalWrite(platformDirection,LOW)
+  if (directions == 1) {  // switches direction if clockwise. May have to change this
+    digitalWrite(platformDirection,HIGH)
+  }
+
   while (stepCounter>0){
-    Serial.print("turn a step cw");
     digitalWrite(platformStep, HIGH);
-    delay(200);
+    delay(100);
     digitalWrite(platformStep,LOW);
     stepCounter -= 1;
-    delay(200);
-  
-  while (stepCounter<0){
-    Serial.print("turn a step ccw");
-    digitalWrite(platformStep, LOW);
-    delay(200);
-    digitalWrite(platformStep, HIGH);
-    stepCounter -= 1;
-    delay(200); }
-  
+    delay(200);  
 }
