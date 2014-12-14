@@ -34,7 +34,9 @@ def send_and_receive( theinput, timeout_time):
     It then waits for a response from Arduino.
     timeout_time is how long it'll wait for a response in seconds
     """
+    print("timeout is "+str(timeout_time))
     ser.timeout=timeout_time
+    
     time.sleep(.05)
     while True:
         
@@ -353,7 +355,7 @@ def calibratePlatform():
     Correct direction to spin to be determined through manual testing
     returns True if calibrated, False otherwise
     """
-    
+    print("calibrating platform")
     result = greenButtonCheck()
     
     if result == "up":

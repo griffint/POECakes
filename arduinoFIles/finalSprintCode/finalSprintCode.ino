@@ -13,8 +13,7 @@ Adafruit_StepperMotor *linearMotor = AFMS.getStepper(200,1);
 
 void setup() { 
   AFMS.begin();
-  myMotor->setSpeed(250);
-  linearMotor->setSpeed(30);
+  
   Serial.begin(9600);
 
 }
@@ -110,7 +109,6 @@ void loop(){
  }
  
 
- //===========END OF MAIN LOOP HERE=================
 
  if (serialInput == "GB?"){
    drawingButton();
@@ -121,6 +119,9 @@ void loop(){
  }
 
  }
+ 
+ 
+ //===========END OF MAIN LOOP HERE=================
 
 
 String waitReadSerial(){
@@ -142,17 +143,16 @@ String waitReadSerial(){
   return readString;
 }
 
-//============TODO==============
-//have this actually spin for the designated time
-//================TODO OVER===================
+
+
 
 void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
    myMotor->setSpeed(220);
    int startTime = 0;
    int currentTime = 0;
    startTime=millis();
-   int k = 0;
-   while(k<9){
+   
+   while((currentTime-startTime)<time){
    
    if (directions==1){
   
@@ -162,67 +162,44 @@ void turnTopFrostingMotor(int time, int directions){  //this turns the extruding
        myMotor->run(BACKWARD);//backward equates to down
      }
    int currentTime = millis();
-   delay(500);
-   Serial.print("in loop");
    
-   k+=1;
- }
+  }
  myMotor->run(RELEASE);
 }
 
-//===============TODO===================
-//have this spin for the actual correct time
-//====================TODO OVER================
+
 
 void turnSideFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
   myExtruder->setSpeed(220);
    int startTime = 0;
    int currentTime = 0;
    startTime=millis();
-   int k = 0;
-   while(k<9){//this should check for time being passed instead of k, get rid of k
+   while((currentTime-startTime)<time){
    
    if (directions==1){
   
-   myExtruder->run(FORWARD);//backward equates to down
- }
- else{
-   myExtruder->run(BACKWARD);//backward equates to down
- }
+     myExtruder->run(FORWARD);//backward equates to down
+   }
+   else{
+     myExtruder->run(BACKWARD);//backward equates to down
+   }
    int currentTime = millis();
-   delay(500);
-   Serial.print("in loop");
    
-   k+=1;
  }
  myExtruder->run(RELEASE);
 }
 
 
-void moveTopStepper(int steps, int directions){ //this moves the top frosting motor given # of steps
-  linearMotor->setSpeed(220);
-   int startTime = 0;
-   int currentTime = 0;
-   startTime=millis();
-   int k = 0;
-   while(k<9){
-   
-   if (directions==1){
+void moveTopStepper(int steps, int directions){ 
+  //this moves the top frosting motor given # of steps
+  //directions should be 1 to move inward, 0 for out
+  linearMotor->setSpeed(60);
   
-   linearMotor->run(FORWARD);//backward equates to in
- }
- else{
-   linearMotor->run(BACKWARD);//backward equates to out
- }
-   int currentTime = millis();
-   delay(500);
-   Serial.print("in loop");
-   
-   k+=1;
- }
+  
+ 
   linearMotor->run(RELEASE);
 }
-}
+
 
 
 void calibrateLinear(int steps, int directions){
@@ -286,8 +263,9 @@ void calibrateStepper(int steps, int directions){
     
   if (reading == HIGH) {
     Serial.println("System OFF");}
-}}
+ }
 }
+
 
 
 void spinPlatform(int steps, int directions){ //this spins the cake platform given # of steps
@@ -309,4 +287,4 @@ void spinPlatform(int steps, int directions){ //this spins the cake platform giv
     stepCounter -= 1;
     delay(200); }
   
-}}
+}
