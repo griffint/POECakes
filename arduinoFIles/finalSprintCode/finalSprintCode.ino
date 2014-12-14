@@ -27,7 +27,7 @@ void loop(){
  //need to extract first 3 chars of string to determine code 
  // then create a string out of the rest of the input
  String serials = waitReadSerial();
- String serialInput = "";
+ String serialInput = "";  //this is first 3 chars of serial input
  String serialNumbers = "";   //serialNumbers is the rest of the input code, should always be numbers like steps or time
  
  for (int i=0, i<3, i++){  //needs testing

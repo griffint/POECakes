@@ -18,8 +18,8 @@ void loop(){
     serialInput += c;
  }
  
- if (serialInput=="PUT"){
-   Serial.println("CON");
+ if (serialInput=="CON"){
+   //Serial.println("YES");
  }
  //Serial.println(serialInput);
 

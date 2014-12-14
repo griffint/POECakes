@@ -18,7 +18,7 @@ fill = False#Remove me!
 ser = serial.Serial(
     port='/dev/ttyACM0',
     baudrate=9600,
-    timeout=0)
+    timeout=10)
     
     
 def send( theinput ):
@@ -39,18 +39,22 @@ def send_and_receive( theinput ):
     This sends a string to arduino through serial.
     It then waits for a response from Arduino.
     """
-    ser.write( theinput )
-    time.sleep(.1)
+    
+    time.sleep(.05)
     while True:
-        try:
-            time.sleep(0.2)
-            state = ser.readline()
+        
+        print("time to send and receive")
+        state = ser.readline() #this has a timeout of 10 seconds
+        if state == "":
             
-            return state
-        except:
-
-            pass
-    time.sleep(0.1)
+            print ("Nothing received dawg")
+            easygui.msgbox("No data received from serial. Please consult somone who knows what they're doing.")
+            return False
+        else:
+            print("Yay we got something")
+            print(state)
+            state = state.replace('\n', '').replace('\r', '')
+            return str(state)
     
 
     
@@ -58,10 +62,13 @@ def connectionCheck():
     """Tests connection to cakebot using send_and_receive
     doesn't have input, outputs True if succesful, False if not
     """
-    result = send_and_receive("CON")
-    if result=="YES":
+    result = str(send_and_receive("CON"))
+   
+    if result == 'YES':
+        print("connected to cakebot")
         return True
     else:
+        print("should return false")
         return False
 
 def greenButtonCheck():
@@ -69,6 +76,7 @@ def greenButtonCheck():
     returns 'down' if down, 'up' if up
     """
     result = send_and_receive("GB?")
+    
     if result == "GBP":
         return "down"
     elif result == "GBU":
@@ -166,6 +174,9 @@ def testTopStepper():
         if choices == "NO":
             easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
             return False
+            
+    else:
+        easygui.msgbox("Something is weird with Cakbot")
 
 
 
@@ -194,6 +205,9 @@ def testPlatformStepper():
         if choices == "NO":
             easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
             return False
+            
+    else:
+        easygui.msgbox("Something is weird with Cakbot")
 
 def testTopFroster():
     """This function will test the top frosting motor. It'll return True if the motor works,
@@ -220,6 +234,9 @@ def testTopFroster():
         if choices == "NO":
             easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
             return False
+            
+    else:
+        easygui.msgbox("Something is weird with Cakbot")
 
 def testSideFroster():
     """This function will test the side frosting motor. It'll return True if the motor works,
@@ -246,17 +263,44 @@ def testSideFroster():
         if choices == "NO":
             easygui.msgbox("Inspect Cakebot please. Exiting testing routine")
             return False
+            
+    else:
+        easygui.msgbox("Something is weird with Cakbot")
 
 def testAllMotors():
     """
     This tests all 4 motors. It takes no arguments. It will run all 4 motor test functions.
     At the end it will give a status report of what motors worked.
     """
+    easygui.msgbox("Press OK to test all motors")
     top = testTopStepper()
     platform = testPlatformStepper()
     topFrost=testTopFroster()
     sideFrost=testSideFroster()
     
+    topTestText = "Top Motor not working \n"
+    platformTestText = "Platform not working \n"
+    topFrostText = "Top froster not working \n"
+    sideFrostText = "Side froster not working \n"
+    
+    if top == True:
+        topTestText = "Top Motor working \n"
+    
+        
+    if platform == True:
+        platformTestText = "Platform working \n"
+    
+        
+    if topFrost ==True:
+        topFrostText = "Top froster working \n"
+
+        
+    if sideFrost == True:
+        sideFrostText = "Side froster working \n"
+    
+        
+        
+    easygui.msgbox(topTestText + platformTestText + topFrostText + sideFrostText + "Exit testing routine")
 
 def calibrateTopStepper():
     pass
@@ -322,6 +366,7 @@ class storer():
         self.topStepCalibrated = False
         self.platformCalibrated = False
         self.platformPosition = 0 #saves the platforms position in steps from calibration zero. clockwise is positive
+        self.topFrostPosition = 0 #saved as steps from calibration 0
         
         
 #Color chooser-----------------------------------------------------------------
@@ -423,15 +468,15 @@ class storer():
             self.saved = True
 
     def mainmenu(self):
-        menuchoice = easygui.choicebox("Select a task", title = "Main Menu", choices = ["Change Color", "Change Brush", "Save", "Open", "Help", "Tool Menu"])
+        menuchoice = easygui.choicebox("Select a task", title = "Main Menu", choices = ["Print Menu", "Change Brush", "Save", "Open", "Help", "Tool Menu"])
         if menuchoice == "Save":
             self.save()
         elif menuchoice == "Help":
             easygui.textbox("Help:", title = "Help", text = open("helptext.txt", "r"))
         elif menuchoice == "Change Brush":
             self.brushchooser()
-        elif menuchoice == "Change Color":
-            self.choosecolor()
+        elif menuchoice == "Print Menu":
+            self.printmenu()
         elif menuchoice == "Tool Menu":
             self.toolmenu()
         elif menuchoice == "Open":
@@ -456,11 +501,18 @@ class storer():
         printmenu = easygui.choicebox("Cakebot Options", title="CakeBot", choices = ["Testing Menu", "Calibration Menu", "Printing help", "Print Your Design!","Print a preset design"])
         #The Testing menu needs to have lots of tools to check all of our motors
         if printmenu == "Testing Menu":
-            testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Extruding Motor", "Test Lazy Susan Motor","Test top frosting motor","Test side frosting motor"])
+            testmenu = easygui.choicebox("Testing Menu for Cakebot", choices = ["Test connection", "Test Extruding Motor", "Test Lazy Susan Motor","Test top frosting motor","Test side frosting motor", "Test all motors" ])
             if testmenu == "Test connection":
                 easygui.msgbox("Press OK to test connection to cakebot")
-                #test overall connection to cakebot 
+                connectResult = connectionCheck()
+                if connectResult == True:
+                    easygui.msgbox("connected to cakebot!!!")
+                elif connectResult == False:
+                    easygui.msgbox("connection failed")
+            if testmenu == "Test all motors":
+                testAllMotors()
         if printmenu == "Calibration Menu":
+            pass
             #calibration options here
         if printmenu == "Printing help":
             easygui.textbox(msg='Here are some helpful tips for cakebot', title='CakeBot Help', text='', codebox=0)
@@ -589,7 +641,7 @@ brushbox = pygame.image.load("resources/brush.gif")
 colortext = pygame.image.load("resources/color.gif")
 
 menubox = pygame.image.load("resources/menu.gif")
-pallette1 = pygame.image.load("resources/pallette1.gif")
+
 paintbox = pygame.image.load("resources/buckets.gif")
 
 #The main loop-----------------------------------------------------------------
@@ -808,8 +860,7 @@ while 1:
                 #new is the image size
                 if pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>10 and pygame.mouse.get_pos()[1]<60:
                     store.brushchooser()
-                elif pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>70 and pygame.mouse.get_pos()[1]<120:
-                    store.choosecolor()
+                
                
                 elif pygame.mouse.get_pos()[0]>store.new[0]+25 and pygame.mouse.get_pos()[0]<store.new[0]+75 and pygame.mouse.get_pos()[1]>190 and pygame.mouse.get_pos()[1]<240:
                     store.mainmenu()
@@ -842,6 +893,6 @@ while 1:
     screen.blit(colortext, [store.new[0] + 25, 70])
     
     screen.blit(menubox, [store.new[0] + 25, 190])
-    screen.blit(pallette1, [store.new[0] + 100, 10])
+    
     screen.blit(paintbox, [store.new[0]+ 100, 145])
     pygame.display.flip()#Flips the Buffer

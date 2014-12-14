@@ -7,7 +7,7 @@ Created on Tue Nov 11 14:14:09 2014
 
 import time
 import serial
-ser = serial.Serial('/dev/ttyACM0', 9600) # Establish the connection on a specific port
+ser = serial.Serial('/dev/ttyACM0', 9600,timeout= 10) # Establish the connection on a specific port
 
 def send_and_receive( theinput ):
     """
@@ -17,16 +17,17 @@ def send_and_receive( theinput ):
     ser.write( theinput )
     time.sleep(.3)
     while True:
-        try:
-            time.sleep(.1)
-            state = ser.readline()
+        time.sleep(.2)
+        state = ser.readline()
+        if state == "":
             
+            print ("Nothing received dawg")
+            break
+        else:
+            print("Yay we got something")
             return state
-        except:
-
-            pass
-    print("My while loop gave up")
-    time.sleep(0.1)
+        
+        
     
 if __name__ == "__main__":
     print(send_and_receive("PUTIN"))
