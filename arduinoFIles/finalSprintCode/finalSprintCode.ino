@@ -9,8 +9,17 @@ Adafruit_DCMotor *myMotor = AFMS.getMotor(3);
 Adafruit_StepperMotor *linearMotor = AFMS.getStepper(200,1);
 
 //code here to initialize all digital I/O ports as ints
-int platformLimit = 10;
-int platformDirection = 11;
+
+int m0Pin = 0;
+int m1Pin = 1;
+int m2Pin = 2;
+int platformLimit1 = 3;
+int platformLimit2 = 4;
+int topLimit1 = 5;
+int topLimit2 = 6;
+int platformDir = 7;
+int platformStep = 8;
+int 
 
 
 void setup() { 
@@ -64,53 +73,23 @@ switch (serialInput) {
   case "RPN":
     spinPlatform(serialNumbers,0);
     break;
-
+  case "FTD":
+    turnTopFrostingMotor(serialNumbers,1);
+    break;
+  case "FTU":
+    turnTopFrostingMotor(serialNumbers,0);
+    break;
+  case "FSD":
+    turnSideFrostingMotor(serialNumbers,1);
+    break;
+  case "FSU":
+    turnSideFrostingMotor(serialNumbers,0);
+    break;
+  case "CLS":
+    break;
+  case "CPS":
+    break;
 }
-
- 
- if (serialInput == "TLS"){
-   moveTopStepper();
- }
- 
- if (serialInput == "TRP"){
-   spinPlatform();
- }
- 
- if (serialInput == "TFT"){
-   turnTopFrostingMotor();
- }
- 
- if (serialInput == "TFS"){
-   turnSideFrostingMotor();
- }
- 
- if (serialInput == "FTD"){
-   directions = 1;
-   turnTopFrostingMotor();
-}
- 
- if (serialInput = "FTU"){
-   directions = 0;
-   turnTopFrostingMotor();
- } 
- 
-  if (serialInput == "FSD"){
-   directions = 1;
-   turnSideFrostingMotor();
-}
- 
- if (serialInput = "FSU"){
-   directions = 0;
-   turnSideFrostingMotor();
- }
- 
- if (serialInput == "CLS"){
-   calibrateLinear();
- }
- 
- if (serialInput == "CPS"){
-   calibrateStepper();
- }
 
 
  }
