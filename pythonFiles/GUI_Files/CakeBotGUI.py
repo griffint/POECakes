@@ -52,7 +52,7 @@ def send_and_receive( theinput, timeout_time):
         else:
             print("Yay we got something")
             print(state)
-            print len(state)
+            print("length of result is "+ str(len(state)))
             state = state.replace('\n', '').replace('\r', '')
             return str(state)
     
@@ -78,10 +78,13 @@ def greenButtonCheck():
     result = send_and_receive("GB?",5)
     
     if result == "GBP":
+        easygui.msgbox("Green button registered as pressed down!")
         return "down"
     elif result == "GBU":
+        easygui.msgbox("Green button registered as up...")
         return "up"
     else:
+        easygui.msgbox("Something got screwed up while attempting to read the green button")
         pass
 
 def orangeSwitchCheck():
@@ -476,11 +479,52 @@ def calibrateAll():
     easygui.msgbox(topTestText + platformTestText + topFrostText + sideFrostText + "Exit testing routine")
     return [top,platform,topFrost,sideFrost]
     
+    
+def printOutsideBorder(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrated): #TODO put arguments in printmenu code
+    if PlatformCalibrated == True:
+        pass
+    else:
+        easygui.msgbox("Please calibrate platform motor")
+    if TopStepperCalibrated == True:
+        pass
+    else:
+        easygui.msgbox("Please calibrate top stepper motor")
+    if TopFrostCalibrated == True:
+        pass
+    else:
+        easygui.msgbox("Please calibrate top frosting motor")
+    easygui.msgbox("Looks like you're calibrated fully. Press OK to print an outside border")
+    
 
-def printDesign():
+def printDesign(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrated, SideFrostCalibrated, lineArray):
     """
     this'll print whatever is on the drawing screen
+    takes as input an array of line segments which it's supposed to draw
+    takes as argument whether it's calibrated or not as True or False
     """
+    
+    #check for all calibrations
+    if PlatformCalibrated == True:
+        pass
+    else:
+        easygui.msgbox("Please calibrate platform motor")
+    if TopStepperCalibrated == True:
+        pass
+    else:
+        easygui.msgbox("Please calibrate top stepper motor")
+    if TopFrostCalibrated == True:
+        pass
+    else:
+        easygui.msgbox("Please calibrate top frosting motor")
+    if SideFrostCalibrated == True:
+        pass
+    else: 
+        easygui.msgbox("Please calibrate side frosting motor")
+        
+    for i in lineArray:
+        #iterate through all lines, print each one, wait for confirmation before next
+        easygui.msgbox("It appears all your motors are calibrated. Please make sure you're ready to print.")
+        
     
     
 # ser.write("23,bottlesj")
@@ -761,7 +805,7 @@ class storer():
                 #Need to write code for printing those choices here
             if presetmenu == "Outside Border":
                 #code to print an outside border here
-                return
+                printOutsideBorder()
         if printmenu == "Manual Control":
             exitmenu = False
             while exitmenu == False:
@@ -878,6 +922,7 @@ def newfile():
 #Sets up the entire program----------------------------------------------------
 newfile()
 pygame.init()
+connectionCheck()  #this is here because the first serial comms always fail for some reason
 #Gets the icon and sets it
 #pygame.display.set_icon(pygame.image.load("resources/icon.gif"))
 #Makes the window and sets the size
@@ -908,17 +953,7 @@ paintbox = pygame.image.load("resources/buckets.gif")
 while 1:
     clock.tick(30)
     
-    #-------------------------------------------------------------
-    #CONTROL CODE FOR CAKEBOT GOES HERE
-    #============================================================
-    #good spot for reading the serial early and often here
-    #will do all codes as 3 chars then a semicolon as a linebreak
     
-   
-    
-    #===========================================================
-    #END OF CONTROL CODE FOR CAKEBOT
-    #===========================================================
     
     
     #Checks for events---basically user doing anything--------------------------

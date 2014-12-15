@@ -78,7 +78,8 @@ void loop(){
     Serial.println("YES");
  }
  else if (serialInput == "GB?"){ //green button check
-    greenButtonCheck();
+ Serial.println("GBP");
+ //greenButtonCheck();
  }
  else if (serialInput == "OS?"){
  }
@@ -211,12 +212,12 @@ void calibrateTopStepper(){
    int counter = 0;
    while (val == LOW && counter<70){
      delay(30);
-     spinPlatform(3,1);
+     moveTopStepper(3,0);
      val = digitalRead(topLimit2);  //STILL NEED TO DETERMINE WHICH ONE IS HIGH
      counter = counter+1;
    }
-   if (digitalRead(topLimit2==HIGH){
-     Serial.println("PSC");
+   if (digitalRead(topLimit2)==HIGH){
+     Serial.println("LSC");
    }
    else {
      Serial.println("no calibratoin");
@@ -246,7 +247,7 @@ void calibratePlatform(){
      val = digitalRead(platformLimit2);  //STILL NEED TO DETERMINE WHICH ONE IS HIGH
      counter = counter+1;
    }
-   if (digitalRead(platformLimit2==HIGH){
+   if (digitalRead(platformLimit2)==HIGH){
      Serial.println("PSC");
    }
    else {
@@ -268,7 +269,7 @@ void spinPlatform(int steps, int directions){  //VERIFIED WORKING, ALTHOUGH SEEM
   }
 
   while (stepCounter>0){
-    Serial.println(stepCounter);
+    
     digitalWrite(platformStep, HIGH);
     delay(100);
     digitalWrite(platformStep,LOW);
