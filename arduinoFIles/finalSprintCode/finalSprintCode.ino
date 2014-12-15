@@ -4,9 +4,9 @@
 #include "utility/Adafruit_PWMServoDriver.h"
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-Adafruit_DCMotor *myExtruder = AFMS.getMotor(4);
-Adafruit_DCMotor *myMotor = AFMS.getMotor(3);
-Adafruit_StepperMotor *linearMotor = AFMS.getStepper(200,1);
+Adafruit_DCMotor *myExtruder = AFMS.getMotor(1);
+Adafruit_DCMotor *myMotor = AFMS.getMotor(2);
+Adafruit_StepperMotor *linearMotor = AFMS.getStepper(200,2);
 
 //code here to initialize all digital I/O ports as ints
 
@@ -19,7 +19,8 @@ int topLimit1 = 5;
 int topLimit2 = 6;
 int platformDir = 7;
 int platformStep = 8;
-int 
+int greenInput = 9;
+
 
 
 void setup() { 
@@ -27,69 +28,91 @@ void setup() {
   Serial.begin(9600);
   
   //set pinMode for every digital I/O pin
-  pinMode(platformLimit, INPUT);
-  pinMode(platformDirection, OUTPUT)
-  
+  pinMode(m0Pin,OUTPUT);
+  pinMode(m1Pin,OUTPUT);
+  pinMode(m2Pin,OUTPUT);
+  pinMode(platformLimit1, INPUT);
+  pinMode(platformLimit2,INPUT);
+  pinMode(topLimit1,INPUT);
+  pinMode(topLimit2,INPUT);
+  pinMode(platformDir, OUTPUT);
+  pinMode(platformStep,OUTPUT);
+  pinMode(greenInput,INPUT);
+ 
+ linearMotor->setSpeed(10); 
+ myMotor->setSpeed(220);
+ myExtruder->setSpeed(220);
+
 }
 
 
 void loop(){
- //arduino must wait for input before sending output to python control code
+ //arduino must wait for input before /sending output to python control code
  //always use println
- 
+
  //need to extract first 3 chars of string to determine code 
  // then create a string out of the rest of the input
  String serials = waitReadSerial();
+ delay(100);
  String serialInput = "";  //this is first 3 chars of serial input
- String serialNumbers = "";   //serialNumbers is the rest of the input code, should always be numbers like steps or time
+ String serialNumbersString = "";   //serialNumbers is the rest of the input code, should always be numbers like steps or time
  
- for (int i=0, i<3, i++){  //needs testing
-    char c = serials.charAt(i);
+ for (int k=0; k<3; k++){  //needs testing
+    char c = serials.charAt(k);
     serialInput += c;
  }
 
- for (int j=3, i<string.length(serials), i++){ //needs testing
+ for (int j=3; j<serials.length(); j++){ //needs testing
     char c = serials.charAt(j);
-    serialNumbers += c;
+    serialNumbersString += c;
+ }
+ 
+ 
+ int serialNumbers = serialNumbersString.toInt();
+ 
+
+
+
+
+ if (serialInput=="CON"){  //connection check
+    Serial.println("YES");
+ }
+ else if (serialInput == "GB?"){ //green button check
+    greenButtonCheck();
+ }
+ else if (serialInput == "OS?"){
+ }
+ else if (serialInput == "LSI"){
+    moveTopStepper(serialNumbers,1);
+ }
+ else if (serialInput == "LSO"){
+    moveTopStepper(serialNumbers,0);
+ }
+ else if (serialInput == "RPC"){
+    spinPlatform(serialNumbers,1);
+ }
+ else if (serialInput == "RPN"){
+    spinPlatform(serialNumbers,0);
+ }
+ else if (serialInput == "FTD"){
+    turnTopFrostingMotor(serialNumbers,1);
+ }
+ else if (serialInput == "FTU"){
+    turnTopFrostingMotor(serialNumbers,0);
+ }
+ else if (serialInput == "FSD"){
+    turnSideFrostingMotor(serialNumbers,1);
+ }
+ else if (serialInput == "FSU"){
+    turnSideFrostingMotor(serialNumbers,0);
+ }
+ else if (serialInput ==  "CLS"){
+   
+ }
+ else if (serialInput == "CPS"){
+   calibratePlatform();
  }
 
-switch (serialInput) {
-  case "CON":  //connection check
-    Serial.println("YES");
-    break;
-  case "GB?": //green button check
-    break;
-  case "OS?":
-    break;
-  case "LSI":
-    moveTopStepper(serialNumbers,1);
-    break;
-  case "LSO":
-    moveTopStepper(serialNumbers,0);
-    break;
-  case "RPC":
-    spinPlatform(serialNumbers,1);
-    break;
-  case "RPN":
-    spinPlatform(serialNumbers,0);
-    break;
-  case "FTD":
-    turnTopFrostingMotor(serialNumbers,1);
-    break;
-  case "FTU":
-    turnTopFrostingMotor(serialNumbers,0);
-    break;
-  case "FSD":
-    turnSideFrostingMotor(serialNumbers,1);
-    break;
-  case "FSU":
-    turnSideFrostingMotor(serialNumbers,0);
-    break;
-  case "CLS":
-    break;
-  case "CPS":
-    break;
-}
 
 
  }
@@ -99,16 +122,16 @@ switch (serialInput) {
 
 
 String waitReadSerial(){
-  
+  String readString = "";
    while (!Serial.available()) {} // wait for data to arrive
   // serial read section
-  while (Serial.available()) // this will be skipped if no data present, leading to
+  while (Serial.available()>0 ) // this will be skipped if no data present, leading to
                             // the code sitting in the delay function below
   {
-    delay(80);  //delay to allow buffer to fill 
+    delay(300);  //delay to allow buffer to fill 
     if (Serial.available() >0)
     {
-      String readString;
+      delay(30);
       char c = Serial.read();  //gets one byte from serial buffer
       readString += c; //makes the string readString
       
@@ -118,15 +141,17 @@ String waitReadSerial(){
 }
 
 
+//=============================================================
 
-
-void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
-   myMotor->setSpeed(220);
+void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds, input should be in seconds now
+//THIS IS VERIFIED WORKING AS OF 8PM SUNDAY NIGHT
+   
    int startTime = 0;
    int currentTime = 0;
    startTime=millis();
    
-   while((currentTime-startTime)<time){
+   while((currentTime-startTime)<(time*1000)){
+     currentTime = millis();
    
    if (directions==1){
   
@@ -134,22 +159,21 @@ void turnTopFrostingMotor(int time, int directions){  //this turns the extruding
      }
     else{
        myMotor->run(BACKWARD);//backward equates to down
-     }
-   int currentTime = millis();
-   
+     } 
   }
  myMotor->run(RELEASE);
 }
 
+//==========================================================
 
-
-void turnSideFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds
-  myExtruder->setSpeed(220);
+void turnSideFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds, input should be in seconds
+//THIS IS VERIFIED WORKING AS OF 8PM SUNDAY NIGHT
+  
    int startTime = 0;
    int currentTime = 0;
    startTime=millis();
-   while((currentTime-startTime)<time){
-   
+   while((currentTime-startTime)<(time*1000)){
+   currentTime = millis();
    if (directions==1){
   
      myExtruder->run(FORWARD);//backward equates to down
@@ -157,17 +181,16 @@ void turnSideFrostingMotor(int time, int directions){  //this turns the extrudin
    else{
      myExtruder->run(BACKWARD);//backward equates to down
    }
-   int currentTime = millis();
-   
  }
  myExtruder->run(RELEASE);
 }
 
+//=====================================================
 
-void moveTopStepper(int steps, int directions){ 
+void moveTopStepper(int steps, int directions){  
   //this moves the top frosting motor given # of steps
   //directions should be 1 to move inward, 0 for out
-  linearMotor->setSpeed(60);
+  
   byte spinDir = 0;
   if (directions == 1){
     spinDir = FORWARD;
@@ -175,93 +198,81 @@ void moveTopStepper(int steps, int directions){
   else if (directions == 0){
     spinDir = BACKWARD;
   }
-  linearMotor.step(steps, spinDir,SINGLE) 
+  
+  linearMotor->step(steps, spinDir,SINGLE); 
  
-  linearMotor.release();
+  linearMotor->release();
 }
 
-
+//==================================================
 
 void calibrateTopStepper(){
-  int limitSwitchOne() {
-  int reading = digitalRead(masterOnOff);
-  int callibrateOne = digitalRead(limitOne);
-  int callibrateTwo = digitalRead(limitTwo);
-    
- if (reading == LOW) { 
-  //Serial.println("System ON");
-  if (callibrateOne == LOW) { // START ROTATING
-     // myMotor->step(1, FORWARD, MICROSTEP);
-      Serial.println("Pressed");
-    }
-     if (callibrateTwo == LOW) { // ALL FLASHING
-      linearMotor->step(0, FORWARD, MICROSTEP);
-      Serial.println("Released"); }
-
-    
-  if (reading == HIGH) {
-    Serial.println("System OFF");}
-}}
+  byte val = LOW;
+   int counter = 0;
+   while (val == LOW && counter<70){
+     delay(30);
+     spinPlatform(3,1);
+     val = digitalRead(topLimit2);  //STILL NEED TO DETERMINE WHICH ONE IS HIGH
+     counter = counter+1;
+   }
+   if (digitalRead(topLimit2==HIGH){
+     Serial.println("PSC");
+   }
+   else {
+     Serial.println("no calibratoin");
+   }
 }
 
+//=======================================================
 
-void greenButton(int steps, int directions){
-  int exportButton() {
-  int greenReading = digitalRead(greenButton);
-  int orangeReading = digitalRead(masterOnOff);
-    
- if (orangeReading == LOW) { 
-  //Serial.println("System ON");
-  if (greenReading == LOW) { // START ROTATING
-     linearMotor->step(0, FORWARD, MICROSTEP);
-      Serial.println("Set Go");
-    }
- 
-  if (greenReading == HIGH) {
-    Serial.println("Paused");}
-}}
-
+void greenButtonCheck(){
+  byte val = digitalRead(greenInput);
+  if (val == HIGH){
+    Serial.println("GBP");
+  }
+  else if (val == LOW){
+    Serial.println("GBU");
+  }
 }
 
+//=====================================================
 
-void calibrateStepper(int steps, int directions){
-  int limitSwitchOne() {
-  int reading = digitalRead(masterOnOff);
-  int callibrateOne = digitalRead(limitOne);
-  int callibrateTwo = digitalRead(limitTwo);
-    
- if (reading == LOW) { 
-  //Serial.println("System ON");
-  if (callibrateOne == LOW) { // START ROTATING
-      //digitalWrite(platformStep, HIGH);
-      Serial.println("Pressed");
-    }
-     if (callibrateTwo == LOW) {
-      digitalWrite(platformStep, LOW);
-      Serial.println("Released"); }}
-
-    
-  if (reading == HIGH) {
-    Serial.println("System OFF");}
- }
+void calibratePlatform(){
+   byte val = LOW;
+   int counter = 0;
+   while (val == LOW && counter<70){
+     delay(30);
+     spinPlatform(3,1);
+     val = digitalRead(platformLimit2);  //STILL NEED TO DETERMINE WHICH ONE IS HIGH
+     counter = counter+1;
+   }
+   if (digitalRead(platformLimit2==HIGH){
+     Serial.println("PSC");
+   }
+   else {
+     Serial.println("no calibratoin");
+   }
 }
 
+//=====================================================
 
-
-void spinPlatform(int steps, int directions){ 
+void spinPlatform(int steps, int directions){  //VERIFIED WORKING, ALTHOUGH SEEMS WEAK
   //this spins the cake platform given # of steps
   //direction of 1 should mean clockwise, 0 = counterclockwise
   //no outputs
+ 
   int stepCounter = steps;
-  digitalWrite(platformDirection,LOW)
+  digitalWrite(platformDir,LOW);
   if (directions == 1) {  // switches direction if clockwise. May have to change this
-    digitalWrite(platformDirection,HIGH)
+    digitalWrite(platformDir,HIGH);
   }
 
   while (stepCounter>0){
+    Serial.println(stepCounter);
     digitalWrite(platformStep, HIGH);
     delay(100);
     digitalWrite(platformStep,LOW);
-    stepCounter -= 1;
+    stepCounter = stepCounter - 1;
     delay(200);  
+ }
 }

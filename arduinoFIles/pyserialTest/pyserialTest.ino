@@ -19,7 +19,7 @@ void loop(){
  }
  
  if (serialInput=="CON"){
-   //Serial.println("YES");
+   Serial.println("YES");
  }
  //Serial.println(serialInput);
 

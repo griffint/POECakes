@@ -36,12 +36,14 @@ def send_and_receive( theinput, timeout_time):
     """
     print("timeout is "+str(timeout_time))
     ser.timeout=timeout_time
-    
-    time.sleep(.05)
+    ser.write(theinput)
+    print("I sent " + theinput +" to cakebot")
+    time.sleep(.8)
     while True:
         
         print("time to send and receive")
         state = ser.readline() #this has a timeout of 10 seconds
+        print(state)
         if state == "":
             
             print ("Nothing received dawg")
@@ -50,6 +52,7 @@ def send_and_receive( theinput, timeout_time):
         else:
             print("Yay we got something")
             print(state)
+            print len(state)
             state = state.replace('\n', '').replace('\r', '')
             return str(state)
     
@@ -188,6 +191,7 @@ def testPlatformStepper():
     it'll return False if the motor does not. THis does not need any input.
     """
     result = greenButtonCheck()
+    
     if result == "up":
         
         #prompt user to press it here
@@ -763,9 +767,9 @@ class storer():
             while exitmenu == False:
                 manualmenu = easygui.buttonbox(msg="Manual Control: press buttons to control cakebot", choices = ("Platform Clockwise", "Platform Counterclockwise", "Top Stepper In", "Top Stepper Out", "Top Froster Out", "Top Froster In", "Side Froster Out", "Side Froster In" , "Exit"))
                 if manualmenu == "Platform Clockwise":
-                    movePlatform(5,1)
+                    movePlatform(10,1)
                 elif manualmenu == "Platform Counterclockwise":
-                    movePlatform(5,0)
+                    movePlatform(10,0)
                 elif manualmenu == "Top Stepper In":
                     moveLinearStepper(20,1)
                 elif manualmenu == "Top Stepper Out":

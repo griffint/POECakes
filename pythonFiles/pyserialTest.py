@@ -25,6 +25,7 @@ def send_and_receive( theinput ):
             break
         else:
             print("Yay we got something")
+            print len(state)
             return state
         
         
@@ -33,4 +34,4 @@ if __name__ == "__main__":
     print(send_and_receive("PUTIN"))
     print("putin should be here")
     time.sleep(1)
-    print(send_and_receive("COCKS"))
+    print(send_and_receive("CON"))
