@@ -40,8 +40,8 @@ void setup() {
   pinMode(greenInput,INPUT);
  
  linearMotor->setSpeed(10); 
- myMotor->setSpeed(220);
- myExtruder->setSpeed(220);
+ myMotor->setSpeed(250);
+ myExtruder->setSpeed(250);
 
 }
 
@@ -53,7 +53,7 @@ void loop(){
  //need to extract first 3 chars of string to determine code 
  // then create a string out of the rest of the input
  String serials = waitReadSerial();
- delay(100);
+ delay(300);
  String serialInput = "";  //this is first 3 chars of serial input
  String serialNumbersString = "";   //serialNumbers is the rest of the input code, should always be numbers like steps or time
  
@@ -78,8 +78,7 @@ void loop(){
     Serial.println("YES");
  }
  else if (serialInput == "GB?"){ //green button check
- Serial.println("GBP");
- //greenButtonCheck();
+   greenButtonCheck();
  }
  else if (serialInput == "OS?"){
  }
@@ -113,7 +112,9 @@ void loop(){
  else if (serialInput == "CPS"){
    calibratePlatform();
  }
-
+ else if (serialInput == "PSB"){
+    presetBorder(); 
+ }
 
 
  }
@@ -145,6 +146,7 @@ String waitReadSerial(){
 //=============================================================
 
 void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds, input should be in seconds now
+//1 direction is extruding
 //THIS IS VERIFIED WORKING AS OF 8PM SUNDAY NIGHT
    
    int startTime = 0;
@@ -271,9 +273,28 @@ void spinPlatform(int steps, int directions){  //VERIFIED WORKING, ALTHOUGH SEEM
   while (stepCounter>0){
     
     digitalWrite(platformStep, HIGH);
-    delay(100);
+    delay(30);
     digitalWrite(platformStep,LOW);
     stepCounter = stepCounter - 1;
-    delay(200);  
+    delay(40);  
  }
+}
+
+//=======================================================
+
+void presetBorder(){
+  int counter = 0;
+   while (counter <66){
+     //may need to move linear stepper to border point.
+     turnTopFrostingMotor(2,1);
+     delay(100);
+     spinPlatform(3,1);
+     delay(100);
+     counter = counter+1;
+   }
+   Serial.println("GUD");
+}
+
+void presetWavyBorder(){
+  
 }

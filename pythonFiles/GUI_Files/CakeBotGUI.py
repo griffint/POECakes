@@ -9,7 +9,7 @@
 
 #Customised for POE use by Griffin Tschurwald. Thank you pie for the base code!
 
-import pygame, sys, easygui, os, serial, numpy, time
+import pygame, sys, easygui, os, serial, numpy, time, math
 
 #print pygame.version.ver
 fill = False#Remove me!
@@ -26,6 +26,7 @@ def send( theinput ):
     This function takes as input a string, then sends it through serial to Arduino
     """
     ser.write( theinput )
+    print(str(theinput) + " sent to cakebot")
     time.sleep(.5)
   
 def send_and_receive( theinput, timeout_time):
@@ -161,6 +162,7 @@ def testTopStepper():
     it'll return False if the motor does not. THis does not need any input.
     """
     result = greenButtonCheck()
+    print("Result of green button check is " +result)
     if result == "up":
         
         #prompt user to press it here
@@ -176,7 +178,7 @@ def testTopStepper():
     elif result == "down":
         moveLinearStepper(20,1)
         moveLinearStepper(20,0)
-        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        choices = easygui.buttonbox(msg="Is top stepper motor spinning?",choices=["YES","NO"])
         if choices == "YES":
             easygui.msgbox("This motor is working!")
             return True
@@ -208,9 +210,9 @@ def testPlatformStepper():
         elif choices == "Exit":
             return False
     elif result == "down":
-        movePlatform(20,1)
-        movePlatform(20,0)
-        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        movePlatform(50,1)
+        movePlatform(50,0)
+        choices = easygui.buttonbox(msg="Is the lazy susan motor spinning?",choices=["YES","NO"])
         if choices == "YES":
             easygui.msgbox("This motor is working!")
             return True
@@ -241,7 +243,7 @@ def testTopFroster():
     elif result == "down":
         moveTopFroster(5,1)
         moveTopFroster(5,0)
-        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        choices = easygui.buttonbox(msg="Is the top frosting motor spinning?",choices=["YES","NO"])
         if choices == "YES":
             easygui.msgbox("This motor is working!")
             return True
@@ -272,7 +274,7 @@ def testSideFroster():
     elif result == "down":
         moveSideFroster(5,1)
         moveSideFroster(5,1)
-        choices = easygui.buttonbox(msg="Is the motor spinning?",choices=["YES","NO"])
+        choices = easygui.buttonbox(msg="Is the side frosting motor spinning?",choices=["YES","NO"])
         if choices == "YES":
             easygui.msgbox("This motor is working!")
             return True
@@ -494,7 +496,47 @@ def printOutsideBorder(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrat
     else:
         easygui.msgbox("Please calibrate top frosting motor")
     easygui.msgbox("Looks like you're calibrated fully. Press OK to print an outside border")
+    result = send_and_receive("PSB",120)
+    if result == "GUD":
+        print("border printed")
+        easygui.msgbox("Your border should be printed")
+    else:
+        print("Error with border")
+        easygui.msgbox("I think something went wrong with the border")
     
+def thetaCalc(point):
+    """
+    input x and y should be the basy x,y as measured from top left
+    This will calculate and return the angle in degrees of a given x,y point
+    as measured from horizontal right. 
+    """
+    x = point[0]-400
+    y = 400 - point[1]
+    if x>0 and y>0:
+        #first quadrant, just do arctan
+        degrees = math.degrees(arctan(y/x))
+    elif x>0 and y<0:
+        degrees = math.degrees(arctan(y/x)) + 360
+    elif x<0 and y>0:
+        degrees = math.degrees(arctan(y/x)) + 180
+    elif x<0 and y<0:
+        degrees = math.degrees(arctan(y/x)) +180
+    elif x == 0 and y>0:
+        degrees = 90
+    elif x==0 and y<0:
+        degrees = 270
+    elif x<0 and y==0:
+        degrees = 180
+    elif x>0 and y==0:
+        degrees = 0
+    elif x==0 and y==0:
+        degrees = 0
+    print("degrees calculated is " +degrees)
+    return degrees
+    
+        
+        
+        
 
 def printDesign(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrated, SideFrostCalibrated, lineArray):
     """
@@ -521,14 +563,57 @@ def printDesign(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrated, Sid
     else: 
         easygui.msgbox("Please calibrate side frosting motor")
         
+    easygui.msgbox("It appears all your motors are calibrated. Please make sure you're ready to print.")
+    previous_radius = 400
+    previous_theta = 0;
     for i in lineArray:
         #iterate through all lines, print each one, wait for confirmation before next
-        easygui.msgbox("It appears all your motors are calibrated. Please make sure you're ready to print.")
         
+        #for each line, will need to convert to polar location
+        #lineArray has format of [[(x,y),(x1,y1)]]
+        
+        first_point = lineArray[i]
+        
+        #gives radius value of this point in terms of pixels from center
+        radius_first = ((first_point[0]-400)**2+(400-first_point[1])**2)**(.5)
+       
+        #now need to do theta calculations. will need to account for correct quadrant
+        
+        theta_first = thetaCalc(first_point)
+        
+        #now to calculate how far it needs to move in terms of pixels and degrees
+        #to get to the first point
     
-    
-# ser.write("23,bottlesj")
-# print ser.read(50)
+        first_move_radius = radius_first - previous_radius
+        first_move_theta = theta_first - previous_theta
+        #now convert to actual step values, will need to round to nearest integer
+        first_move_rsteps = int(round(first_move_radius*.674))
+        first_move_tsteps = int(round(first_move_theta*(5/9)))
+        
+        #now to actually move it, then lay frosting at that point
+        #first move the linear stepper
+        #a negative rsteps indicates moving inward, which means input of 1
+        print("Telling linear stepper to move " + first_move_rsteps + " steps")
+        if first_move_rsteps<0:
+            moveLinearStepper((-1*first_move_rsteps),1)
+        else:
+            moveLinearStepper(first_move_rsteps,0)
+        time.sleep(10)
+        #moving platform. clockwise==negative theta change==input of 1
+        print("Telling platform to move " + first_move_tsteps + " steps")
+        if first_move_tsteps<0:
+            movePlatform((-1*first_move_tsteps),1)
+        else:
+            movePlatform(first_move_tsteps,0)
+        time.sleep(10)
+        #then lay down some sweet frosting
+        moveTopFroster(2,1)
+        time.sleep(10)
+        previous_radius = first_move_radius
+        previous_theta = first_move_theta
+    easygui.msgbox("Your design should be printed!!!!")
+        
+     
 #==============================================================================
 #Variable storer---------------------------------------------------------------
 
@@ -800,28 +885,30 @@ class storer():
             easygui.textbox(msg='Here are some helpful tips for cakebot', title='CakeBot Help', text='Ask griffin cause this program is weird', codebox=0)
         if printmenu == "Print Your Design!":
             easygui.msgbox("Printing Sequence Starting when OK pressed")
+            printDesign(True,True,True,True, self.drawing_storer)
         if printmenu == "Print a preset design":
             presetmenu = easygui.choicebox("Pick a preset design to print to your cake", choices = ["Outside Border","Wavy Border", "Border Near Center"," Wavy Border Near Center"])
                 #Need to write code for printing those choices here
             if presetmenu == "Outside Border":
+                printOutsideBorder(True,True,True)  #these will need to be false when actually going.
                 #code to print an outside border here
-                printOutsideBorder()
+                
         if printmenu == "Manual Control":
             exitmenu = False
             while exitmenu == False:
                 manualmenu = easygui.buttonbox(msg="Manual Control: press buttons to control cakebot", choices = ("Platform Clockwise", "Platform Counterclockwise", "Top Stepper In", "Top Stepper Out", "Top Froster Out", "Top Froster In", "Side Froster Out", "Side Froster In" , "Exit"))
                 if manualmenu == "Platform Clockwise":
-                    movePlatform(10,1)
+                    movePlatform(5,1)
                 elif manualmenu == "Platform Counterclockwise":
-                    movePlatform(10,0)
+                    movePlatform(5,0)
                 elif manualmenu == "Top Stepper In":
-                    moveLinearStepper(20,1)
+                    moveLinearStepper(200,1)
                 elif manualmenu == "Top Stepper Out":
-                    moveLinearStepper(20,0)
+                    moveLinearStepper(200,0)
                 elif manualmenu == "Top Froster Out":
-                    moveTopFroster(2,1)
+                    moveTopFroster(5,1)
                 elif manualmenu == "Top Froster In":
-                    moveTopFroster(2,0)
+                    moveTopFroster(5,0)
                 elif manualmenu == "Side Froster Out":
                     moveSideFroster(2,1)
                 elif manualmenu == "Side Froster In":
@@ -976,12 +1063,12 @@ while 1:
                 store.drawline(testoldpos, testpos, store.bsize)   #(point one, point 2, width)
                 if len(store.drawing_storer) >0 :
                     
-                    if store.drawing_storer[-1] !=[testoldpos,testpos]:
-                        store.drawing_storer.append([testoldpos,testpos])
+                    if store.drawing_storer[-1] !=testpos:
+                        store.drawing_storer.append(testpos)
                         print len(store.drawing_storer)
                         
                 elif len(store.drawing_storer) == 0 :
-                    store.drawing_storer.append([testoldpos,testpos])
+                    store.drawing_storer.append(testpos)
                 #check for any duplicates
                 
                 
