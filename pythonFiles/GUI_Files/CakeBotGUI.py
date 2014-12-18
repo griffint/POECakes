@@ -28,6 +28,8 @@ def send( theinput ):
     ser.write( theinput )
     print(str(theinput) + " sent to cakebot")
     time.sleep(.5)
+    ser.flushOutput()
+    ser.flushInput()
   
 def send_and_receive( theinput, timeout_time):
     """
@@ -77,7 +79,7 @@ def greenButtonCheck():
     returns 'down' if down, 'up' if up
     """
     result = send_and_receive("GB?",5)
-    
+    return "GBP"
     if result == "GBP":
         easygui.msgbox("Green button registered as pressed down!")
         return "down"
@@ -504,35 +506,44 @@ def printOutsideBorder(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrat
         print("Error with border")
         easygui.msgbox("I think something went wrong with the border")
     
-def thetaCalc(point):
+def thetaCalc(x1,y1):
     """
     input x and y should be the basy x,y as measured from top left
     This will calculate and return the angle in degrees of a given x,y point
     as measured from horizontal right. 
     """
-    x = point[0]-400
-    y = 400 - point[1]
+    x = x1-400
+    print("x into calculation is " +str(x))
+    y = 400 - y1
+    print("y into calculation is " + str(y))
+    print("numpy reveals " + str(numpy.arctan(y/x)))
     if x>0 and y>0:
         #first quadrant, just do arctan
-        degrees = math.degrees(arctan(y/x))
+        degreees = math.degrees(math.atan(y/x))
+        print(str(math.atan(y/x)))
+        print("first quadrant")
     elif x>0 and y<0:
-        degrees = math.degrees(arctan(y/x)) + 360
+        degreees = math.degrees(math.atan(y/x)) + 360
+        print(str(math.degrees(math.atan(y/x)) + 360))
+        print("second quadrant")
     elif x<0 and y>0:
-        degrees = math.degrees(arctan(y/x)) + 180
+        degreees = math.degrees(math.atan(y/x)) + 180
+        print("third quadrant")
     elif x<0 and y<0:
-        degrees = math.degrees(arctan(y/x)) +180
+        degreees = math.degrees(math.atan(y/x)) +180
+        print("fourth quadrant")
     elif x == 0 and y>0:
-        degrees = 90
+        degreees = 90
     elif x==0 and y<0:
-        degrees = 270
+        degreees = 270
     elif x<0 and y==0:
-        degrees = 180
+        degreees = 180
     elif x>0 and y==0:
-        degrees = 0
+        degreees = 0
     elif x==0 and y==0:
-        degrees = 0
-    print("degrees calculated is " +degrees)
-    return degrees
+        degreees = 0
+    print("degrees calculated is " +str(degreees))
+    return degreees
     
         
         
@@ -566,7 +577,8 @@ def printDesign(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrated, Sid
     easygui.msgbox("It appears all your motors are calibrated. Please make sure you're ready to print.")
     previous_radius = 400
     previous_theta = 0;
-    for i in lineArray:
+    i = 0;
+    while i<len(lineArray):
         #iterate through all lines, print each one, wait for confirmation before next
         
         #for each line, will need to convert to polar location
@@ -574,33 +586,43 @@ def printDesign(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrated, Sid
         
         first_point = lineArray[i]
         
+        print("time to print the point at " + str(lineArray[i]))
+        
         #gives radius value of this point in terms of pixels from center
         radius_first = ((first_point[0]-400)**2+(400-first_point[1])**2)**(.5)
-       
+        print("previous radius was " + str(previous_radius))
+        print("new radius is " + str(radius_first))
         #now need to do theta calculations. will need to account for correct quadrant
-        
-        theta_first = thetaCalc(first_point)
+    
+        theta_first = thetaCalc(first_point[0],first_point[1])
         
         #now to calculate how far it needs to move in terms of pixels and degrees
         #to get to the first point
     
         first_move_radius = radius_first - previous_radius
         first_move_theta = theta_first - previous_theta
+        if math.fabs(first_move_radius)<2 and math.fabs(first_move_theta)<1:
+            print("These steps are too small")   
+            i+=1
+            continue
         #now convert to actual step values, will need to round to nearest integer
         first_move_rsteps = int(round(first_move_radius*.674))
-        first_move_tsteps = int(round(first_move_theta*(5/9)))
+        print("First move theta is " + str(first_move_theta))
+        print int(round(first_move_theta*(.55555555)))
+        first_move_tsteps = int(round(first_move_theta*(.5555555)))
+        print first_move_tsteps
         
         #now to actually move it, then lay frosting at that point
         #first move the linear stepper
         #a negative rsteps indicates moving inward, which means input of 1
-        print("Telling linear stepper to move " + first_move_rsteps + " steps")
+        print("Telling linear stepper to move " + str(first_move_rsteps) + " steps")
         if first_move_rsteps<0:
             moveLinearStepper((-1*first_move_rsteps),1)
         else:
             moveLinearStepper(first_move_rsteps,0)
         time.sleep(10)
         #moving platform. clockwise==negative theta change==input of 1
-        print("Telling platform to move " + first_move_tsteps + " steps")
+        print("Telling platform to move " + str(first_move_tsteps) + " steps")
         if first_move_tsteps<0:
             movePlatform((-1*first_move_tsteps),1)
         else:
@@ -609,8 +631,10 @@ def printDesign(PlatformCalibrated,TopStepperCalibrated, TopFrostCalibrated, Sid
         #then lay down some sweet frosting
         moveTopFroster(2,1)
         time.sleep(10)
-        previous_radius = first_move_radius
-        previous_theta = first_move_theta
+        previous_radius = radius_first
+        previous_theta = theta_first
+        i+=1
+        
     easygui.msgbox("Your design should be printed!!!!")
         
      
@@ -887,28 +911,30 @@ class storer():
             easygui.msgbox("Printing Sequence Starting when OK pressed")
             printDesign(True,True,True,True, self.drawing_storer)
         if printmenu == "Print a preset design":
-            presetmenu = easygui.choicebox("Pick a preset design to print to your cake", choices = ["Outside Border","Wavy Border", "Border Near Center"," Wavy Border Near Center"])
+            presetmenu = easygui.choicebox("Pick a preset design to print to your cake", choices = ["Outside Border","Wavy Border", "Border Near Center"," Wavy Border Near Center","Spiral"])
                 #Need to write code for printing those choices here
             if presetmenu == "Outside Border":
                 printOutsideBorder(True,True,True)  #these will need to be false when actually going.
                 #code to print an outside border here
+            if presetmenu == "Spiral":
+                send("SPI")
                 
         if printmenu == "Manual Control":
             exitmenu = False
             while exitmenu == False:
                 manualmenu = easygui.buttonbox(msg="Manual Control: press buttons to control cakebot", choices = ("Platform Clockwise", "Platform Counterclockwise", "Top Stepper In", "Top Stepper Out", "Top Froster Out", "Top Froster In", "Side Froster Out", "Side Froster In" , "Exit"))
                 if manualmenu == "Platform Clockwise":
-                    movePlatform(5,1)
+                    movePlatform(3,1)
                 elif manualmenu == "Platform Counterclockwise":
-                    movePlatform(5,0)
+                    movePlatform(3,0)
                 elif manualmenu == "Top Stepper In":
-                    moveLinearStepper(200,1)
+                    moveLinearStepper(10,1)
                 elif manualmenu == "Top Stepper Out":
-                    moveLinearStepper(200,0)
+                    moveLinearStepper(10,0)
                 elif manualmenu == "Top Froster Out":
-                    moveTopFroster(5,1)
+                    moveTopFroster(1,1)
                 elif manualmenu == "Top Froster In":
-                    moveTopFroster(5,0)
+                    moveTopFroster(30,0)
                 elif manualmenu == "Side Froster Out":
                     moveSideFroster(2,1)
                 elif manualmenu == "Side Froster In":

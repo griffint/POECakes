@@ -96,6 +96,7 @@ void loop(){
  }
  else if (serialInput == "FTD"){
     turnTopFrostingMotor(serialNumbers,1);
+    Serial.println("Frosting motor commanded to move");
  }
  else if (serialInput == "FTU"){
     turnTopFrostingMotor(serialNumbers,0);
@@ -114,6 +115,9 @@ void loop(){
  }
  else if (serialInput == "PSB"){
     presetBorder(); 
+ }
+ else if (serialInput == "SPI"){
+   presetSpiral();
  }
 
 
@@ -148,14 +152,15 @@ String waitReadSerial(){
 void turnTopFrostingMotor(int time, int directions){  //this turns the extruding motor a given milliseconds, input should be in seconds now
 //1 direction is extruding
 //THIS IS VERIFIED WORKING AS OF 8PM SUNDAY NIGHT
-   
+   Serial.println("Turning frosting motor");
    int startTime = 0;
    int currentTime = 0;
    startTime=millis();
+   currentTime=millis();
    
    while((currentTime-startTime)<(time*1000)){
      currentTime = millis();
-   
+     Serial.println("In the frosting while loop");
    if (directions==1){
   
        myMotor->run(FORWARD);//backward equates to down
@@ -174,6 +179,7 @@ void turnSideFrostingMotor(int time, int directions){  //this turns the extrudin
   
    int startTime = 0;
    int currentTime = 0;
+   delay(100);
    startTime=millis();
    while((currentTime-startTime)<(time*1000)){
    currentTime = millis();
@@ -273,10 +279,10 @@ void spinPlatform(int steps, int directions){  //VERIFIED WORKING, ALTHOUGH SEEM
   while (stepCounter>0){
     
     digitalWrite(platformStep, HIGH);
-    delay(30);
+    delay(50);
     digitalWrite(platformStep,LOW);
     stepCounter = stepCounter - 1;
-    delay(40);  
+    delay(50);  
  }
 }
 
@@ -287,14 +293,26 @@ void presetBorder(){
    while (counter <66){
      //may need to move linear stepper to border point.
      turnTopFrostingMotor(2,1);
-     delay(100);
+     delay(1000);
+     turnSideFrostingMotor(2,1);
+     delay(1000);
      spinPlatform(3,1);
-     delay(100);
+     delay(1000);
      counter = counter+1;
    }
    Serial.println("GUD");
 }
 
-void presetWavyBorder(){
-  
+void presetSpiral(){
+  int counter = 0;
+  while(counter<180){
+    turnTopFrostingMotor(1,1);
+    delay(1000);
+    spinPlatform(4,1);
+    delay(1000);
+    moveTopStepper(4,1);
+    delay(1000);
+    counter = counter + 1;
+  }
+    
 }
